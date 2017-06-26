@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 r.gROOT.SetBatch(True)
 
+c1 = r.TCanvas()
 
 class Chamber:
 	def __init__(self, report, child):
@@ -45,29 +46,72 @@ class ChamberInfo:
 class WheelSectorHistograms:
 	def __init__(self, name, chamber_class):
 		self.name = name
-		self.TH1F_sector_x = []
+		self.TH2F_sector_x = []
 		for wheel in range(5):
-			self.TH1F_sector_x.append([])
+			self.TH2F_sector_x.append([])
 			for station in range(4):
-				self.TH1F_sector_x[wheel].append( r.TH2F("TH1F_sector_x_{}_{}".format(wheel-2,station+1),"wheel {} station {}".format(wheel-2,station+1), 100, 0, 20000, 100, -.3,.3 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH1F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
+			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
 
 	def draw_hists(self):
 		for wheel in range(5):
 			for station in range(4):
-				self.TH1F_sector_x[wheel][station].Draw()
-				c1.SaveAs("output/TH1F_sector_x_{}_{}.png".format(wheel-2,station+1))
-				print self.TH1F_sector_x[wheel][station].GetRMS()
-	
+				self.TH2F_sector_x[wheel][station].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,station+1))
+				print self.TH2F_sector_x[wheel][station].GetRMS()
 
+	def getRMSStats(self,wheel, sector):
+		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
+
+	def getMeanStats(self,wheel, sector):
+		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
+
+	def getRMSX(self,wheel, sector):
+		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+	
 
 
 execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
 example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
 
+example2 = WheelSectorHistograms("example", example)
+
+example2.draw_hists()
+
+execfile("full.py")
+full = ChamberInfo("full", reports, "full.xml")
+full_hist = WheelSectorHistograms("full", full)
+
+execfile("half.py")
+half = ChamberInfo("half", reports, "half.xml")
+half_hist = WheelSectorHistograms("half", half)
+half_hist.draw_hists()
+
+execfile("one_third.py")
+one_third = ChamberInfo("one_third", reports, "one_third.xml")
+one_third_hist = WheelSectorHistograms("one_third", one_third)
+
+
+execfile("one_sixth.py")
+one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
+one_sixth_hist = WheelSectorHistograms("one_sixth", one_sixth)
+
+
+print full_hist.getMeanStats(0,1), "\t", full_hist.getRMSX(0,1)
+
+print example2.getMeanStats(0,1), "\t",  example2.getRMSX(0,1)
+
+
+print half_hist.getMeanStats(0,1), "\t",  half_hist.getRMSX(0,1)
+
+
+print one_sixth_hist.getMeanStats(0,1), "\t",  one_sixth_hist.getRMSX(0,1)
+
+
+print one_third_hist.getMeanStats(0,1), "\t",  one_third_hist.getRMSX(0,1)
 
 #execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
 #tree = ET.parse('mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml')
@@ -76,12 +120,12 @@ example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_
 
 #example.set_values(reports, root)
 
-c1 = r.TCanvas()
 
 
-example2 = WheelSectorHistograms("example", example)
 
-example2.draw_hists()
+
+
+#print "0,4", example2.getMeanStats(0,4), example2.getRMSStats(0,4)
 
 #for wheel in range(5):
 #	TH1F_sector_x.append([])
