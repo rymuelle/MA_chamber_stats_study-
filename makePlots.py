@@ -48,30 +48,81 @@ class WheelSectorHistograms:
 	def __init__(self, name, chamber_class):
 		self.name = name
 		self.TH2F_sector_x = []
+		self.TH2F_sector_y = []
+		self.TH2F_sector_z = []
+		self.TH2F_sector_phix = []
+		self.TH2F_sector_phiy = []
+		self.TH2F_sector_phiz = []
 		for wheel in range(5):
 			self.TH2F_sector_x.append([])
+			self.TH2F_sector_y.append([])
+			self.TH2F_sector_z.append([])
+			self.TH2F_sector_phix.append([])
+			self.TH2F_sector_phiy.append([])
+			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
 			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
+			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
+			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
+			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
+			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
+			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+
+
+
 
 	def draw_hists(self):
 		for wheel in range(5):
 			for sector in range(4):
 				self.TH2F_sector_x[wheel][sector].Draw()
 				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
-				print self.TH2F_sector_x[wheel][sector].GetRMS()
+				self.TH2F_sector_y[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_z[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phix[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiy[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiz[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
 
-	def getRMSStats(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
+				#print self.TH2F_sector_x[wheel][sector].GetRMS()
+
+	#def getRMSStats(self,wheel, sector):
+	#	return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
 
 	def getMeanStats(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
 
 	def getRMSX(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+
+	def getRMSY(self,wheel, sector):
+		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+
+	def getRMSZ(self,wheel, sector):
+		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+
+	def getRMSPHIX(self,wheel, sector):
+		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+
+	def getRMSPHIY(self,wheel, sector):
+		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+
+	def getRMSPHIZ(self,wheel, sector):
+		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
+
+
 	
 hist_array = []
 
@@ -89,7 +140,7 @@ hist_array.append(WheelSectorHistograms("full", full))
 execfile("half.py")
 half = ChamberInfo("half", reports, "half.xml")
 hist_array.append(WheelSectorHistograms("half", half))
-#half_hist.draw_hists()
+#hist_array[1].draw_hists()
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
@@ -117,27 +168,28 @@ conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]^2/x+[1]^2)",0,200000)
 conv_gaussian.SetParameters(1.0, .01)
 conv_gaussian.SetParNames("slope", "offset")
 
-Th2F_stats_v_rms = []
+TH2F_stats_v_rms_x = []
 TLine_cutoff = []
 color = 1
 for sector in range(4):
 	color = 1
-	Th2F_stats_v_rms.append([])
+	TH2F_stats_v_rms_x.append([])
 	TLine_cutoff.append([])
 	for wheel in range(5):
-		Th2F_stats_v_rms[sector].append( r.TH2F("Th2F_stats_v_rms_{}_{}".format(wheel-2, sector+1), "Th2F_stats_v_rms_{}_{}".format(wheel-2, sector+1), 100, 0, 200000, 100, 0, 0.05))
+		TH2F_stats_v_rms_x[sector].append( r.TH2F("TH2F_stats_v_rms_x_{}_{}".format(wheel-2, sector+1), "TH2F_stats_v_rms_x_{}_{}".format(wheel-2, sector+1), 100, 0, 200000, 100, 0, 0.05))
 		#for hist in enumerate(hist_array):
 		for count in range(len(hist_array)):
-			Th2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMSX(wheel-2,sector+1))
+			TH2F_stats_v_rms_x[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMSX(wheel-2,sector+1))
+			#print hist_array[count].getRMSY(wheel-2,sector+1), hist_array[count].getRMSPHIZ(wheel-2,sector+1)
 
-		Th2F_stats_v_rms[sector][wheel].SetMarkerStyle(8)
-		Th2F_stats_v_rms[sector][wheel].SetMarkerColor(color)
-		Th2F_stats_v_rms[sector][wheel].Fit("conv_gaussian", "Q")
-		cutoff = math.pow((Th2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/Th2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
+		TH2F_stats_v_rms_x[sector][wheel].SetMarkerStyle(8)
+		TH2F_stats_v_rms_x[sector][wheel].SetMarkerColor(color)
+		TH2F_stats_v_rms_x[sector][wheel].Fit("conv_gaussian", "Q")
+		cutoff = math.pow((TH2F_stats_v_rms_x[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TH2F_stats_v_rms_x[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
 		TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,.05))
 		TLine_cutoff[sector][wheel].SetLineColor(color)
-		Th2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(color)
-		Th2F_stats_v_rms[sector][wheel].SetLineColor(color)
+		TH2F_stats_v_rms_x[sector][wheel].GetFunction("conv_gaussian").SetLineColor(color)
+		TH2F_stats_v_rms_x[sector][wheel].SetLineColor(color)
 		color = color + 1
 
 
@@ -145,13 +197,13 @@ for sector in range(4):
 	legend =  r.TLegend(0.82,0.68,0.9,0.88)
 	for wheel in range(5):
 		if(wheel == 0):	
-			Th2F_stats_v_rms[sector][wheel].Draw()
+			TH2F_stats_v_rms_x[sector][wheel].Draw()
 		else:
-			Th2F_stats_v_rms[sector][wheel].Draw("same")
+			TH2F_stats_v_rms_x[sector][wheel].Draw("same")
 		TLine_cutoff[sector][wheel].Draw()
-		legend.AddEntry(Th2F_stats_v_rms[sector][wheel], "{} {}".format( wheel -2, sector+1), "lep")
+		legend.AddEntry(TH2F_stats_v_rms_x[sector][wheel], "{} {}".format( wheel -2, sector+1), "lep")
 	legend.Draw()
-	c1.SaveAs("output/Th2F_stats_v_rms_sector{}.png".format( sector+1))
+	c1.SaveAs("output/TH2F_stats_v_rms_x_sector{}.png".format( sector+1))
 		
 	
 		
@@ -163,7 +215,7 @@ for sector in range(4):
 	
 
 
-#Th2F_stats_v_rms_1_1 =  r.TH2F("Th2F_stats_v_rms_1_1", "Th2F_stats_v_rms_1_1 wheels +/- 1", 100, 0, 200000, 100, 0, 0.05)
+#TH2F_stats_v_rms_x_1_1 =  r.TH2F("Th2F_stats_v_rms_1_1", "Th2F_stats_v_rms_1_1 wheels +/- 1", 100, 0, 200000, 100, 0, 0.05)
 #Th2F_stats_v_rms_1_2 =  r.TH2F("Th2F_stats_v_rms_1_2", "Th2F_stats_v_rms_1_2", 100, 0, 200000, 100, 0, 0.05)
 #Th2F_stats_v_rms_1_3 =  r.TH2F("Th2F_stats_v_rms_1_3", "Th2F_stats_v_rms_1_3", 100, 0, 200000, 100, 0, 0.05)
 #Th2F_stats_v_rms_1_4 =  r.TH2F("Th2F_stats_v_rms_1_4", "Th2F_stats_v_rms_1_4", 100, 0, 200000, 100, 0, 0.05)
