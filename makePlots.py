@@ -20,6 +20,7 @@ class Chamber:
 		self.phix = child['phix']
 		self.phiy = child['phiy']
 		self.phiz = child['phiz']
+		
 
 class ChamberInfo:
 	def __init__(self, name, reports, xml):
@@ -42,6 +43,8 @@ class ChamberInfo:
 				
 		#for count, chamber in enumerate(self.chambers):
 		#	print chamber.detector, chamber.wheel, chamber.station, chamber.sector, chamber.stats, chamber.x
+	#def drawHistX():
+
 
 
 class WheelSectorHistograms:
@@ -84,17 +87,17 @@ class WheelSectorHistograms:
 		for wheel in range(5):
 			for sector in range(4):
 				self.TH2F_sector_x[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
 				self.TH2F_sector_y[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
 				self.TH2F_sector_z[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
 				self.TH2F_sector_phix[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
 				self.TH2F_sector_phiy[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
 				self.TH2F_sector_phiz[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output_mc/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
 
 				#print self.TH2F_sector_x[wheel][sector].GetRMS()
 
@@ -105,26 +108,30 @@ class WheelSectorHistograms:
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
 
 	def getRMSX(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_x[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSY(self,wheel, sector):
-		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_y[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSZ(self,wheel, sector):
-		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_z[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSPHIX(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_phix[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSPHIY(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_phiy[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSPHIZ(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2), self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
 
 def make2dStatsPlots(hist_array, name, rms_range):
-	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]^2/x+[1]^2)",0,200000)
+	#conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt(-[0]^2/x+[1]^2)",0,200000)
+	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
 	conv_gaussian.SetParameters(1.0, .01)
+	#conv_gaussian.SetParLimits(1, 0, 100)
+	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
 	conv_gaussian.SetParNames("slope", "offset")
 	
 	TH2F_stats_v_rms = []
@@ -138,9 +145,9 @@ def make2dStatsPlots(hist_array, name, rms_range):
 			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), 100, 0, 200000, 100, 0, rms_range))
 			#for hist in enumerate(hist_array):
 			for count in range(len(hist_array)):
-				fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMS{}(wheel-2,sector+1))".format(name)
+				fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMS{}(wheel-2,sector+1)[0])".format(name)
 				exec(fill_command)
-				exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel-2,sector+1)".format(name)
+				exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel-2,sector+1)[0]".format(name)
 				exec(exception_catch_rms)
 				if  rms_value > rms_range:
 					print "out of range"
@@ -148,9 +155,18 @@ def make2dStatsPlots(hist_array, name, rms_range):
 
 			TH2F_stats_v_rms[sector][wheel].SetMarkerStyle(8)
 			TH2F_stats_v_rms[sector][wheel].SetMarkerColor(color)
-			TH2F_stats_v_rms[sector][wheel].Fit("conv_gaussian", "Q") 
-			cutoff = math.pow((TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
-			print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel-2, sector+1, cutoff)
+			fit = TH2F_stats_v_rms[sector][wheel].Fit("conv_gaussian", "BSQ") 
+			#TH2F_stats_v_rms[sector][wheel].Fit("expo", "Q") 
+			cutoff = abs((TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)))
+			rand_const = TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)
+			sys_cons = TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
+			chi2 = TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetChisquare()
+			#cov = fit.GetCovarianceMatrix()
+			#print cov
+			#Cut_error = math.sqrt(math.pow(cutoff,2)*(math.pow(cov(0,0)/rand_const,2) + math.pow(cov(1,1)/sys_cons,2) -2*cov(0,1)/(rand_const*sys_cons)  ))
+			#print  "cuttoff for {} RMS /{}/{}: random: {} sys: {} cutoff: {}".format(name, wheel-2, sector+1, rand_const, sys_cons, cutoff)
+			Cut_error = 0
+			print  "{} \t {} \t {} \t {} \t {} \t {} \t {} \t {} \t {}".format(name, wheel-2, sector+1, rand_const, sys_cons, cutoff, hist_array[1].getMeanStats(wheel-2,sector+1),Cut_error, chi2) 
 			TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,rms_range))
 			TLine_cutoff[sector][wheel].SetLineColor(color)
 			TH2F_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(color)
@@ -168,7 +184,7 @@ def make2dStatsPlots(hist_array, name, rms_range):
 			TLine_cutoff[sector][wheel].Draw()
 			legend.AddEntry(TH2F_stats_v_rms[sector][wheel], "{} {}".format( wheel -2, sector+1), "lep")
 		legend.Draw()
-		c1.SaveAs("output/TH2F_stats_v_rms_{}_sector{}.png".format(name, sector+1))
+		c1.SaveAs("output_mc/TH2F_stats_v_rms_{}_sector{}.png".format(name, sector+1))
 		
 
 
@@ -183,6 +199,10 @@ hist_array.append(WheelSectorHistograms("example", example))
 
 #example2.draw_hists()
 
+execfile("full_data.py")
+full_data = ChamberInfo("full_data", reports, "full_data.xml")
+#hist_array.append(WheelSectorHistograms("full_data", full_data))
+
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
@@ -194,7 +214,7 @@ hist_array.append(WheelSectorHistograms("half", half))
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
-hist_array.append(WheelSectorHistograms("one_third", one_third))
+#hist_array.append(WheelSectorHistograms("one_third", one_third))
 
 
 execfile("one_sixth.py")
@@ -205,20 +225,20 @@ hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
 
 execfile("super_small.py")
 super_small = ChamberInfo("super_small", reports, "super_small.xml")
-hist_array.append(WheelSectorHistograms("super_small", super_small))
+#hist_array.append(WheelSectorHistograms("super_small", super_small))
 
 
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
-hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
+#hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
 
 #print dir(hist_array[0])
 
 
 make2dStatsPlots(hist_array, "X", .1)
-make2dStatsPlots(hist_array, "Y", .3)
+make2dStatsPlots(hist_array, "Y", .2)
 make2dStatsPlots(hist_array, "Z", .3)
-make2dStatsPlots(hist_array, "PHIX", .03)
+make2dStatsPlots(hist_array, "PHIX", .01)
 make2dStatsPlots(hist_array, "PHIY", .014)
 make2dStatsPlots(hist_array, "PHIZ", .002)
 		
