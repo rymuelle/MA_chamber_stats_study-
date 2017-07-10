@@ -21,6 +21,7 @@ class Chamber:
 		self.phiy = child['phiy']
 		self.phiz = child['phiz']
 		
+		
 
 class ChamberInfo:
 	def __init__(self, name, reports, xml):
@@ -28,18 +29,32 @@ class ChamberInfo:
 		self.chambers = []
 		tree = ET.ElementTree(file=xml)
 		root = tree.getroot()
+		self.TH1F_X = r.TH1F("TH1F_X_{}".format(name), ";x position (cm);  count", 100, -1, 1)
+		self.totalMuons = 0
 		self.set_values(reports, root)
+		self.c2 = r.TCanvas()
+
 
 	def set_values(self,reports, root):
 		for count,report in enumerate(reports):
 			if report.postal_address[0] == "DT":
-				#print report.postal_address[1],report.postal_address[2], report.postal_address[3]
 				count = 0 
 				for child in root.findall("./operation/*[@wheel='{}'][@station='{}'][@sector='{}']/../setposition".format(report.postal_address[1],report.postal_address[2], report.postal_address[3])):
-					#print child.tag, child.attrib
 					if(count == 0): 
 						self.chambers.append(Chamber(report,child.attrib))
 					count = count + 1
+
+		for thing in enumerate(self.chambers):
+			 self.TH1F_X.Fill(float(thing[1].x))
+			 self.totalMuons = self.totalMuons + float(thing[1].stats)
+
+	def drawHist(self):
+		self.TH1F_X.Draw()
+		print "stats: {} rms: {} mean: {}".format(self.totalMuons , self.TH1F_X.GetRMS(), self.TH1F_X.GetMean())
+		print "{} \t {} \t {}".format(self.totalMuons , self.TH1F_X.GetRMS(), self.TH1F_X.GetMean())
+		self.c2.SaveAs("TH1F_x_{}.png".format(self.name))
+
+
 				
 		#for count, chamber in enumerate(self.chambers):
 		#	print chamber.detector, chamber.wheel, chamber.station, chamber.sector, chamber.stats, chamber.x
@@ -194,8 +209,10 @@ hist_array = []
 
 execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
 example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
+example.drawHist()
 
 hist_array.append(WheelSectorHistograms("example", example))
+
 
 #example2.draw_hists()
 
@@ -206,30 +223,37 @@ full_data = ChamberInfo("full_data", reports, "full_data.xml")
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
+full.drawHist()
+
 
 execfile("half.py")
 half = ChamberInfo("half", reports, "half.xml")
 hist_array.append(WheelSectorHistograms("half", half))
 #hist_array[1].draw_hists()
+half.drawHist()
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
 #hist_array.append(WheelSectorHistograms("one_third", one_third))
+one_third.drawHist()
 
 
 execfile("one_sixth.py")
 one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
 hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
+one_sixth.drawHist()
 
 
 
 execfile("super_small.py")
 super_small = ChamberInfo("super_small", reports, "super_small.xml")
-#hist_array.append(WheelSectorHistograms("super_small", super_small))
 
+#hist_array.append(WheelSectorHistograms("super_small", super_small))
+super_small.drawHist()
 
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
+superduper_small.drawHist()
 #hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
 
 #print dir(hist_array[0])
