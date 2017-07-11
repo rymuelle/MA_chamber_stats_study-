@@ -29,8 +29,14 @@ class ChamberInfo:
 		self.chambers = []
 		tree = ET.ElementTree(file=xml)
 		root = tree.getroot()
-		self.TH1F_X = r.TH1F("TH1F_X_{}".format(name), ";x position (cm);  count", 100, -1, 1)
+		self.TH1F_X = r.TH1F("TH1F_X_{}".format(name), ";X position (cm);  count", 100, -1, 1)
+		self.TH1F_Y = r.TH1F("TH1F_Y_{}".format(name), ";Y position (cm);  count", 100, -1, 1)
+		self.TH1F_Z = r.TH1F("TH1F_Z_{}".format(name), ";Z position (cm);  count", 100, -1, 1)
+		self.TH1F_phiX = r.TH1F("TH1F_phiX_{}".format(name), ";#phi X position (cm);  count", 100, -.02, .02)
+		self.TH1F_phiY = r.TH1F("TH1F_phiY_{}".format(name), ";#phi Y position (cm);  count", 100, -.04, .04)
+		self.TH1F_phiZ = r.TH1F("TH1F_phiZ_{}".format(name), ";#phi Z position (cm);  count", 100, -.01, .01)
 		self.totalMuons = 0
+		self.absAverage = 0
 		self.set_values(reports, root)
 		self.c2 = r.TCanvas()
 
@@ -46,13 +52,35 @@ class ChamberInfo:
 
 		for thing in enumerate(self.chambers):
 			 self.TH1F_X.Fill(float(thing[1].x))
+			 self.TH1F_Y.Fill(float(thing[1].y))
+			 self.TH1F_Z.Fill(float(thing[1].z))
+			 self.TH1F_phiX.Fill(float(thing[1].phix))
+			 self.TH1F_phiY.Fill(float(thing[1].phiy))
+			 self.TH1F_phiZ.Fill(float(thing[1].phiz))
 			 self.totalMuons = self.totalMuons + float(thing[1].stats)
+			 self.absAverage = self.absAverage + abs(float(thing[1].x))
+		self.absAverage = self.absAverage/len(self.chambers)
 
 	def drawHist(self):
 		self.TH1F_X.Draw()
-		print "stats: {} rms: {} mean: {}".format(self.totalMuons , self.TH1F_X.GetRMS(), self.TH1F_X.GetMean())
+		self.c2.SaveAs("output_mc/TH1F_X_{}.png".format(self.name))
+
+		self.TH1F_Y.Draw()
+		self.c2.SaveAs("output_mc/TH1F_Y_{}.png".format(self.name))
+		
+		self.TH1F_Z.Draw()
+		self.c2.SaveAs("output_mc/TH1F_Z_{}.png".format(self.name))
+	
+		self.TH1F_phiX.Draw()
+		self.c2.SaveAs("output_mc/TH1F_phiX_{}.png".format(self.name))
+	
+		self.TH1F_phiY.Draw()
+		self.c2.SaveAs("output_mc/TH1F_phiY_{}.png".format(self.name))
+		
+		self.TH1F_phiZ.Draw()
+		self.c2.SaveAs("output_mc/TH1F_phiZ_{}.png".format(self.name))
+		#print "stats: {} rms: {} mean: {}".format(self.totalMuons , self.TH1F_X.GetRMS(), self.TH1F_X.GetMean())
 		print "{} \t {} \t {}".format(self.totalMuons , self.TH1F_X.GetRMS(), self.TH1F_X.GetMean())
-		self.c2.SaveAs("TH1F_x_{}.png".format(self.name))
 
 
 				
@@ -99,20 +127,21 @@ class WheelSectorHistograms:
 
 
 	def draw_hists(self):
+		c4 = r.TCanvas()
 		for wheel in range(5):
 			for sector in range(4):
-				self.TH2F_sector_x[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_y[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_z[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_phix[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_phiy[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_phiz[wheel][sector].Draw()
-				c1.SaveAs("output_mc/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_x[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_y[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_z[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phix[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiy[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiz[wheel][sector].ProjectionY().Draw()
+				c4.SaveAs("output_mc/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
 
 				#print self.TH2F_sector_x[wheel][sector].GetRMS()
 
@@ -207,9 +236,12 @@ def make2dStatsPlots(hist_array, name, rms_range):
 	
 hist_array = []
 
+report_array = []
+
 execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
 example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
 example.drawHist()
+report_array.append(example)
 
 hist_array.append(WheelSectorHistograms("example", example))
 
@@ -218,12 +250,17 @@ hist_array.append(WheelSectorHistograms("example", example))
 
 execfile("full_data.py")
 full_data = ChamberInfo("full_data", reports, "full_data.xml")
+stats_7_5_fb = full_data.totalMuons
+
 #hist_array.append(WheelSectorHistograms("full_data", full_data))
+
 
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
 full.drawHist()
+report_array.append(full)
+hist_array[1].draw_hists()
 
 
 execfile("half.py")
@@ -231,22 +268,27 @@ half = ChamberInfo("half", reports, "half.xml")
 hist_array.append(WheelSectorHistograms("half", half))
 #hist_array[1].draw_hists()
 half.drawHist()
+report_array.append(half)
+
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
 #hist_array.append(WheelSectorHistograms("one_third", one_third))
 one_third.drawHist()
+report_array.append(one_third)
 
 
 execfile("one_sixth.py")
 one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
 hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
 one_sixth.drawHist()
+report_array.append(one_sixth)
 
 
 
 execfile("super_small.py")
 super_small = ChamberInfo("super_small", reports, "super_small.xml")
+report_array.append(super_small)
 
 #hist_array.append(WheelSectorHistograms("super_small", super_small))
 super_small.drawHist()
@@ -254,6 +296,8 @@ super_small.drawHist()
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
 superduper_small.drawHist()
+report_array.append(superduper_small)
+
 #hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
 
 #print dir(hist_array[0])
@@ -265,6 +309,99 @@ make2dStatsPlots(hist_array, "Z", .3)
 make2dStatsPlots(hist_array, "PHIX", .01)
 make2dStatsPlots(hist_array, "PHIY", .014)
 make2dStatsPlots(hist_array, "PHIZ", .002)
+
+
+TH2F_X_stdev_DTs = r.TH2F("TH2F_X_stdev_DTs", "Final chamber position X vs. approximate luminosity; L; X abs(mean) (cm) ", 100, 0, 9, 100, 0, .04)
+
+
+TH2F_X_mean_DTs = r.TH2F("TH2F_X_mean_DTs", "Final chamber position X vs. approximate luminosity; L; X mean (cm) ", 100, 0, 9, 100, 0, .02 )
+
+rmsRangeX = .04
+rmsRangeY = .2
+rmsRangeZ = .2
+TH2F_X_rms_DTs = r.TH2F("TH2F_X_rms_DTs", "Final chamber position X vs. approximate luminosity; L; X RMS (cm) ", 100, 0, 9, 100, 0, rmsRangeX)
+TH2F_Y_rms_DTs = r.TH2F("TH2F_Y_rms_DTs", "Final chamber position Y vs. approximate luminosity; L; Y RMS (cm) ", 100, 0, 9, 100, 0, rmsRangeY)
+TH2F_Z_rms_DTs = r.TH2F("TH2F_Z_rms_DTs", "Final chamber position Z vs. approximate luminosity; L; Z RMS (cm) ", 100, 0, 9, 100, 0, rmsRangeZ)
+rmsRangePhiX = .004
+rmsRangePhiY = .004
+rmsRangePhiZ = .001
+TH2F_phiX_rms_DTs = r.TH2F("TH2F_phiX_rms_DTs", "Final chamber position #phi X vs. approximate luminosity; L; #phi X RMS (cm) ", 100, 0, 9, 100, 0, rmsRangePhiX)
+TH2F_phiY_rms_DTs = r.TH2F("TH2F_phiY_rms_DTs", "Final chamber position #phi Y vs. approximate luminosity; L; #phi Y RMS (cm) ", 100, 0, 9, 100, 0, rmsRangePhiY)
+TH2F_phiZ_rms_DTs = r.TH2F("TH2F_phiZ_rms_DTs", "Final chamber position #phi Z vs. approximate luminosity; L; #phi Z RMS (cm) ", 100, 0, 9, 100, 0, rmsRangePhiZ)
+
+for count, report in enumerate(report_array):
+	print report.totalMuons, report.totalMuons/stats_7_5_fb*7.5
+	print report.TH1F_X.GetRMS(), report.TH1F_X.GetStdDev()
+
+	TH2F_X_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_X.GetRMS())
+	TH2F_Y_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_Y.GetRMS())
+	TH2F_Z_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_Z.GetRMS())
+	TH2F_phiX_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_phiX.GetRMS())
+	TH2F_phiY_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_phiY.GetRMS())
+	TH2F_phiZ_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_phiZ.GetRMS())
+
+	TH2F_X_stdev_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAverage)
+	TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, abs(report.TH1F_X.GetMean()))
+
+
+
+
+
+
+def drawFunction(hist, name, rmsRange):
+	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
+	conv_gaussian.SetParameters(1.0, .01)
+	#conv_gaussian.SetParLimits(1, 0, 100)
+	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+	conv_gaussian.SetParNames("slope", "offset")
+
+	hist.SetMarkerStyle(8)
+
+	c3 = r.TCanvas()
+	hist.Fit("conv_gaussian","BSQ")
+	cutoff = abs((hist.GetFunction("conv_gaussian").GetParameter(0)/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff2 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*2/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff4 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoffE = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParError(1)))
+
+	TL_cutoff = r.TLine(cutoff, 0, cutoff,   rmsRange)
+	TL_cutoff2 = r.TLine(cutoff2, 0, cutoff2,   rmsRange)
+	TL_cutoff4 = r.TLine(cutoff4, 0, cutoff4,   rmsRange)
+	TL_cutoffE = r.TLine(cutoffE, 0, cutoffE,   rmsRange)
+
+	TL_cutoff.SetLineColor(2)
+	TL_cutoff2.SetLineColor(3)
+	TL_cutoff4.SetLineColor(4)
+	TL_cutoffE.SetLineColor(5)
+	leg = r.TLegend(0.7,0.68,0.9,0.88)
+	leg.AddEntry(TL_cutoff, "#sigma_{rand} = #sigma_{sys}" ,"le")
+	leg.AddEntry(TL_cutoff2, "2 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoff4, "4 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoffE, "#sigma_{rand} = #sigma_{sys} Error" , "le")
+	hist.Draw()
+	leg.Draw()
+	TL_cutoff.Draw()
+	TL_cutoff2.Draw()
+	TL_cutoff4.Draw()
+	TL_cutoffE.Draw()
+	c3.SaveAs("output_mc/TH2F_{}_rms_DTs.png".format(name))
+	print "{} {} {} {} {}".format(name ,cutoff, cutoff2, cutoff4, cutoffE)
+
+
+drawFunction(TH2F_X_rms_DTs, "X",rmsRangeX)
+
+drawFunction(TH2F_Y_rms_DTs, "Y",rmsRangeY)
+
+drawFunction(TH2F_Z_rms_DTs, "Z",rmsRangeZ)
+
+drawFunction(TH2F_phiX_rms_DTs, "phiX",rmsRangePhiX)
+
+drawFunction(TH2F_phiY_rms_DTs, "phiY",rmsRangePhiY)
+
+drawFunction(TH2F_X_stdev_DTs, "stdev_x",.04)
+
+drawFunction(TH2F_X_mean_DTs, "mean_x",.01)
 		
 
 
