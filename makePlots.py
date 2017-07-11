@@ -14,12 +14,14 @@ class Chamber:
 		self.station= report.postal_address[2]
 		self.sector = report.postal_address[3]
 		self.stats = report.posNum
-		self.x = child['x']
-		self.y = child['y']
-		self.z = child['z']
-		self.phix = child['phix']
-		self.phiy = child['phiy']
-		self.phiz = child['phiz']
+		self.x = float(child['x'])
+		self.y = float(child['y'])
+		self.z = float(child['z'])
+		self.phix = float(child['phix'])
+		self.phiy = float(child['phiy'])
+		self.phiz = float(child['phiz'])
+
+
 		
 		
 
@@ -256,8 +258,8 @@ report_array = []
 
 execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
 example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
-example.drawHist()
-report_array.append(example)
+#example.drawHist()
+#report_array.append(example)
 
 hist_array.append(WheelSectorHistograms("example", example))
 
@@ -274,7 +276,7 @@ stats_7_5_fb = full_data.totalMuons
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
-full.drawHist()
+#full.drawHist()
 report_array.append(full)
 hist_array[1].draw_hists()
 
@@ -283,21 +285,21 @@ execfile("half.py")
 half = ChamberInfo("half", reports, "half.xml")
 hist_array.append(WheelSectorHistograms("half", half))
 #hist_array[1].draw_hists()
-half.drawHist()
+#half.drawHist()
 report_array.append(half)
 
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
 #hist_array.append(WheelSectorHistograms("one_third", one_third))
-one_third.drawHist()
+#one_third.drawHist()
 report_array.append(one_third)
 
 
 execfile("one_sixth.py")
 one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
 hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
-one_sixth.drawHist()
+#one_sixth.drawHist()
 report_array.append(one_sixth)
 
 
@@ -311,7 +313,7 @@ super_small.drawHist()
 
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
-superduper_small.drawHist()
+#superduper_small.drawHist()
 report_array.append(superduper_small)
 
 #hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
@@ -319,12 +321,12 @@ report_array.append(superduper_small)
 #print dir(hist_array[0])
 
 
-make2dStatsPlots(hist_array, "X", .1)
-make2dStatsPlots(hist_array, "Y", .2)
-make2dStatsPlots(hist_array, "Z", .3)
-make2dStatsPlots(hist_array, "PHIX", .01)
-make2dStatsPlots(hist_array, "PHIY", .014)
-make2dStatsPlots(hist_array, "PHIZ", .002)
+#make2dStatsPlots(hist_array, "X", .1)
+#make2dStatsPlots(hist_array, "Y", .2)
+#make2dStatsPlots(hist_array, "Z", .3)
+#make2dStatsPlots(hist_array, "PHIX", .01)
+#make2dStatsPlots(hist_array, "PHIY", .014)
+#make2dStatsPlots(hist_array, "PHIZ", .002)
 
 
 TH2F_X_absmean_DTs = r.TH2F("TH2F_X_absmean_DTs", "Final chamber position X vs. approximate luminosity; L; X abs(mean) (cm) ", 100, 0, 9, 100, 0, .04)
@@ -383,74 +385,87 @@ for count, report in enumerate(report_array):
 	#TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, abs(report.TH1F_X.GetMean()))
 
 
+c4 = r.TCanvas()
+TH1F_distance_histograms = []
+
+for i in range(len(report_array)):
+	#for j in range(len(report_array[i].chambers)):
+	TH1F_distance_histograms.append(r.TH1F("distance_histograms_{}".format(i), "distance {}".format(report_array[i].name), 100, -.08,.08) )
+
+	for j in range(len(report_array[i].chambers)):
+		#print (report_array[i-1].chambers[j-1].stats+ .0)/(full_data.chambers[j].stats+.0)*7.5, report_array[i-1].chambers[j-1].x- full.chambers[j].x
+		TH1F_distance_histograms[i].Fill(report_array[i].chambers[j].x- full.chambers[j].x )
+
+	print report_array[i].totalMuons, TH1F_distance_histograms[i].GetRMS()
+	TH1F_distance_histograms[i].Draw()
+	c4.SaveAs("TH1F_distance_histograms_{}.png".format(i))
 
 
-
-
-def drawFunction(hist, name, rmsRange):
-	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
-	conv_gaussian.SetParameters(1.0, .01)
-	#conv_gaussian.SetParLimits(1, 0, 100)
-	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
-	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
-	conv_gaussian.SetParNames("slope", "offset")
-
-	hist.SetMarkerStyle(8)
-
-	c3 = r.TCanvas()
-	hist.Fit("conv_gaussian","BSQ")
-	cutoff = abs((hist.GetFunction("conv_gaussian").GetParameter(0)/hist.GetFunction("conv_gaussian").GetParameter(1)))
-	cutoff2 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*2/hist.GetFunction("conv_gaussian").GetParameter(1)))
-	cutoff4 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParameter(1)))
-	cutoffE = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParError(1)))
-
-	TL_cutoff = r.TLine(cutoff, 0, cutoff,   rmsRange)
-	TL_cutoff2 = r.TLine(cutoff2, 0, cutoff2,   rmsRange)
-	TL_cutoff4 = r.TLine(cutoff4, 0, cutoff4,   rmsRange)
-	TL_cutoffE = r.TLine(cutoffE, 0, cutoffE,   rmsRange)
-
-	TL_cutoff.SetLineColor(2)
-	TL_cutoff2.SetLineColor(3)
-	TL_cutoff4.SetLineColor(4)
-	TL_cutoffE.SetLineColor(5)
-	leg = r.TLegend(0.7,0.68,0.9,0.88)
-	leg.AddEntry(TL_cutoff, "#sigma_{rand} = #sigma_{sys}" ,"le")
-	leg.AddEntry(TL_cutoff2, "2 x #sigma_{rand} = #sigma_{sys}" , "le")
-	leg.AddEntry(TL_cutoff4, "4 x #sigma_{rand} = #sigma_{sys}" , "le")
-	leg.AddEntry(TL_cutoffE, "#sigma_{rand} = #sigma_{sys} Error" , "le")
-	hist.Draw()
-	leg.Draw()
-	TL_cutoff.Draw()
-	TL_cutoff2.Draw()
-	TL_cutoff4.Draw()
-	TL_cutoffE.Draw()
-	c3.SaveAs("output_mc/TH2F_{}_rms_DTs.png".format(name))
-	print "{} {} {} {} {}".format(name ,cutoff, cutoff2, cutoff4, cutoffE)
-
-
-drawFunction(TH2F_X_rms_DTs, "X",rmsRangeX)
-
-drawFunction(TH2F_Y_rms_DTs, "Y",rmsRangeY)
-
-drawFunction(TH2F_Z_rms_DTs, "Z",rmsRangeZ)
-
-drawFunction(TH2F_phiX_rms_DTs, "phiX",rmsRangePhiX)
-
-drawFunction(TH2F_phiY_rms_DTs, "phiY",rmsRangePhiY)
-
-
-drawFunction(TH2F_X_mean_DTs, "absmean_X",meanRangeX)
-drawFunction(TH2F_Y_mean_DTs, "absmean_Y",meanRangeY)
-drawFunction(TH2F_Z_mean_DTs, "absmean_Z",meanRangeZ)
-
-drawFunction(TH2F_PhiX_mean_DTs, "absmean_PhiX",meanRangePhiX)
-drawFunction(TH2F_PhiY_mean_DTs, "absmean_PhiY",meanRangePhiY)
-drawFunction(TH2F_PhiZ_mean_DTs, "absmean_PhiZ",meanRangePhiZ)
-
-#drawFunction(TH2F_X_absmean_DTs, "absmean_x",.04)
-
-#drawFunction(TH2F_X_mean_DTs, "mean_x",.01)
-		
-
-
-
+#def drawFunction(hist, name, rmsRange):
+#	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
+#	conv_gaussian.SetParameters(1.0, .01)
+#	#conv_gaussian.SetParLimits(1, 0, 100)
+#	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+#	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+#	conv_gaussian.SetParNames("slope", "offset")
+#
+#	hist.SetMarkerStyle(8)
+#
+#	c3 = r.TCanvas()
+#	hist.Fit("conv_gaussian","BSQ")
+#	cutoff = abs((hist.GetFunction("conv_gaussian").GetParameter(0)/hist.GetFunction("conv_gaussian").GetParameter(1)))
+#	cutoff2 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*2/hist.GetFunction("conv_gaussian").GetParameter(1)))
+#	cutoff4 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParameter(1)))
+#	cutoffE = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParError(1)))
+#
+#	TL_cutoff = r.TLine(cutoff, 0, cutoff,   rmsRange)
+#	TL_cutoff2 = r.TLine(cutoff2, 0, cutoff2,   rmsRange)
+#	TL_cutoff4 = r.TLine(cutoff4, 0, cutoff4,   rmsRange)
+#	TL_cutoffE = r.TLine(cutoffE, 0, cutoffE,   rmsRange)
+#
+#	TL_cutoff.SetLineColor(2)
+#	TL_cutoff2.SetLineColor(3)
+#	TL_cutoff4.SetLineColor(4)
+#	TL_cutoffE.SetLineColor(5)
+#	leg = r.TLegend(0.7,0.68,0.9,0.88)
+#	leg.AddEntry(TL_cutoff, "#sigma_{rand} = #sigma_{sys}" ,"le")
+#	leg.AddEntry(TL_cutoff2, "2 x #sigma_{rand} = #sigma_{sys}" , "le")
+#	leg.AddEntry(TL_cutoff4, "4 x #sigma_{rand} = #sigma_{sys}" , "le")
+#	leg.AddEntry(TL_cutoffE, "#sigma_{rand} = #sigma_{sys} Error" , "le")
+#	hist.Draw()
+#	leg.Draw()
+#	TL_cutoff.Draw()
+#	TL_cutoff2.Draw()
+#	TL_cutoff4.Draw()
+#	TL_cutoffE.Draw()
+#	c3.SaveAs("output_mc/TH2F_{}_rms_DTs.png".format(name))
+#	print "{} {} {} {} {}".format(name ,cutoff, cutoff2, cutoff4, cutoffE)
+#
+#
+#drawFunction(TH2F_X_rms_DTs, "X",rmsRangeX)
+#
+#drawFunction(TH2F_Y_rms_DTs, "Y",rmsRangeY)
+#
+#drawFunction(TH2F_Z_rms_DTs, "Z",rmsRangeZ)
+#
+#drawFunction(TH2F_phiX_rms_DTs, "phiX",rmsRangePhiX)
+#
+#drawFunction(TH2F_phiY_rms_DTs, "phiY",rmsRangePhiY)
+#
+#
+#drawFunction(TH2F_X_mean_DTs, "absmean_X",meanRangeX)
+#drawFunction(TH2F_Y_mean_DTs, "absmean_Y",meanRangeY)
+#drawFunction(TH2F_Z_mean_DTs, "absmean_Z",meanRangeZ)
+#
+#drawFunction(TH2F_PhiX_mean_DTs, "absmean_PhiX",meanRangePhiX)
+#drawFunction(TH2F_PhiY_mean_DTs, "absmean_PhiY",meanRangePhiY)
+#drawFunction(TH2F_PhiZ_mean_DTs, "absmean_PhiZ",meanRangePhiZ)
+#
+##drawFunction(TH2F_X_absmean_DTs, "absmean_x",.04)
+#
+##drawFunction(TH2F_X_mean_DTs, "mean_x",.01)
+#		
+#
+#
+#
+#
