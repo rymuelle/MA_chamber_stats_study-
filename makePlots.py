@@ -36,7 +36,13 @@ class ChamberInfo:
 		self.TH1F_phiY = r.TH1F("TH1F_phiY_{}".format(name), ";#phi Y position (cm);  count", 100, -.04, .04)
 		self.TH1F_phiZ = r.TH1F("TH1F_phiZ_{}".format(name), ";#phi Z position (cm);  count", 100, -.01, .01)
 		self.totalMuons = 0
-		self.absAverage = 0
+		self.absAverageX = 0
+		self.absAverageY = 0
+		self.absAverageZ = 0
+		self.absAveragePhiX = 0
+		self.absAveragePhiY = 0
+		self.absAveragePhiZ = 0
+
 		self.set_values(reports, root)
 		self.c2 = r.TCanvas()
 
@@ -58,8 +64,18 @@ class ChamberInfo:
 			 self.TH1F_phiY.Fill(float(thing[1].phiy))
 			 self.TH1F_phiZ.Fill(float(thing[1].phiz))
 			 self.totalMuons = self.totalMuons + float(thing[1].stats)
-			 self.absAverage = self.absAverage + abs(float(thing[1].x))
-		self.absAverage = self.absAverage/len(self.chambers)
+			 self.absAverageX = self.absAverageX + abs(float(thing[1].x))
+			 self.absAverageY = self.absAverageY + abs(float(thing[1].y))
+			 self.absAverageZ = self.absAverageZ + abs(float(thing[1].z))
+			 self.absAveragePhiX = self.absAveragePhiX + abs(float(thing[1].phix))
+			 self.absAveragePhiY = self.absAveragePhiY + abs(float(thing[1].phiy))
+			 self.absAveragePhiZ = self.absAveragePhiZ + abs(float(thing[1].phiz))
+		self.absAverageX = self.absAverageX/len(self.chambers)
+		self.absAverageY = self.absAverageY/len(self.chambers)
+		self.absAverageZ = self.absAverageZ/len(self.chambers)
+		self.absAveragePhiX = self.absAveragePhiX/len(self.chambers)
+		self.absAveragePhiY = self.absAveragePhiY/len(self.chambers)
+		self.absAveragePhiZ = self.absAveragePhiZ/len(self.chambers)
 
 	def drawHist(self):
 		self.TH1F_X.Draw()
@@ -311,10 +327,26 @@ make2dStatsPlots(hist_array, "PHIY", .014)
 make2dStatsPlots(hist_array, "PHIZ", .002)
 
 
-TH2F_X_stdev_DTs = r.TH2F("TH2F_X_stdev_DTs", "Final chamber position X vs. approximate luminosity; L; X abs(mean) (cm) ", 100, 0, 9, 100, 0, .04)
+TH2F_X_absmean_DTs = r.TH2F("TH2F_X_absmean_DTs", "Final chamber position X vs. approximate luminosity; L; X abs(mean) (cm) ", 100, 0, 9, 100, 0, .04)
 
 
-TH2F_X_mean_DTs = r.TH2F("TH2F_X_mean_DTs", "Final chamber position X vs. approximate luminosity; L; X mean (cm) ", 100, 0, 9, 100, 0, .02 )
+meanRangeX = .04
+meanRangeY = .2
+meanRangeZ = .2
+meanRangePhiX = .004
+meanRangePhiY = .004
+meanRangePhiZ = .001
+
+TH2F_X_mean_DTs = r.TH2F("TH2F_X_mean_DTs", "Final chamber position X vs. approximate luminosity; L; X mean (cm) ", 100, 0, 9, 100, 0, meanRangeX )
+TH2F_Y_mean_DTs = r.TH2F("TH2F_Y_mean_DTs", "Final chamber position Y vs. approximate luminosity; L; Y mean (cm) ", 100, 0, 9, 100, 0, meanRangeY )
+TH2F_Z_mean_DTs = r.TH2F("TH2F_Z_mean_DTs", "Final chamber position Z vs. approximate luminosity; L; Z mean (cm) ", 100, 0, 9, 100, 0, meanRangeZ )
+
+TH2F_PhiX_mean_DTs = r.TH2F("TH2F_PhiX_mean_DTs", "Final chamber position #phi_{X} vs. approximate luminosity; L; #phi_{X} mean (cm) ", 100, 0, 9, 100, 0, meanRangePhiX )
+TH2F_PhiY_mean_DTs = r.TH2F("TH2F_PhiY_mean_DTs", "Final chamber position #phi_{Y} vs. approximate luminosity; L; #phi_{Y} mean (cm) ", 100, 0, 9, 100, 0, meanRangePhiY )
+TH2F_PhiZ_mean_DTs = r.TH2F("TH2F_PhiZ_mean_DTs", "Final chamber position #phi_{Z} vs. approximate luminosity; L; #phi_{Z} mean (cm) ", 100, 0, 9, 100, 0, meanRangePhiZ )
+
+
+
 
 rmsRangeX = .04
 rmsRangeY = .2
@@ -340,8 +372,15 @@ for count, report in enumerate(report_array):
 	TH2F_phiY_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_phiY.GetRMS())
 	TH2F_phiZ_rms_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5,report.TH1F_phiZ.GetRMS())
 
-	TH2F_X_stdev_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAverage)
-	TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, abs(report.TH1F_X.GetMean()))
+	TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAverageX)
+	TH2F_Y_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAverageY)
+	TH2F_Z_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAverageZ)
+	TH2F_PhiX_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAveragePhiX)
+	TH2F_PhiY_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAveragePhiY)
+	TH2F_PhiZ_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, report.absAveragePhiZ)
+
+
+	#TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, abs(report.TH1F_X.GetMean()))
 
 
 
@@ -399,9 +438,18 @@ drawFunction(TH2F_phiX_rms_DTs, "phiX",rmsRangePhiX)
 
 drawFunction(TH2F_phiY_rms_DTs, "phiY",rmsRangePhiY)
 
-drawFunction(TH2F_X_stdev_DTs, "stdev_x",.04)
 
-drawFunction(TH2F_X_mean_DTs, "mean_x",.01)
+drawFunction(TH2F_X_mean_DTs, "absmean_X",meanRangeX)
+drawFunction(TH2F_Y_mean_DTs, "absmean_Y",meanRangeY)
+drawFunction(TH2F_Z_mean_DTs, "absmean_Z",meanRangeZ)
+
+drawFunction(TH2F_PhiX_mean_DTs, "absmean_PhiX",meanRangePhiX)
+drawFunction(TH2F_PhiY_mean_DTs, "absmean_PhiY",meanRangePhiY)
+drawFunction(TH2F_PhiZ_mean_DTs, "absmean_PhiZ",meanRangePhiZ)
+
+#drawFunction(TH2F_X_absmean_DTs, "absmean_x",.04)
+
+#drawFunction(TH2F_X_mean_DTs, "mean_x",.01)
 		
 
 
