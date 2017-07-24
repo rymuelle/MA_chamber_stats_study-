@@ -248,7 +248,87 @@ def make2dStatsPlots(hist_array, name, rms_range):
 		legend.Draw()
 		c1.SaveAs("output_mc/TH2F_stats_v_rms_{}_sector{}.png".format(name, sector+1))
 		
+def drawFunction(hist, name, rmsRange):
+	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
+	conv_gaussian.SetParameters(1.0, .01)
+	#conv_gaussian.SetParLimits(1, 0, 100)
+	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+	conv_gaussian.SetParNames("slope", "offset")
 
+	hist.SetMarkerStyle(8)
+
+	c3 = r.TCanvas()
+	hist.Fit("conv_gaussian","BSQ")
+	cutoff = abs((hist.GetFunction("conv_gaussian").GetParameter(0)/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff2 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*2/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff4 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoffE = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParError(1)))
+
+	TL_cutoff = r.TLine(cutoff, 0, cutoff,   rmsRange)
+	TL_cutoff2 = r.TLine(cutoff2, 0, cutoff2,   rmsRange)
+	TL_cutoff4 = r.TLine(cutoff4, 0, cutoff4,   rmsRange)
+	TL_cutoffE = r.TLine(cutoffE, 0, cutoffE,   rmsRange)
+
+	TL_cutoff.SetLineColor(2)
+	TL_cutoff2.SetLineColor(3)
+	TL_cutoff4.SetLineColor(4)
+	TL_cutoffE.SetLineColor(5)
+	leg = r.TLegend(0.7,0.68,0.9,0.88)
+	leg.AddEntry(TL_cutoff, "#sigma_{rand} = #sigma_{sys}" ,"le")
+	leg.AddEntry(TL_cutoff2, "2 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoff4, "4 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoffE, "#sigma_{rand} = #sigma_{sys} Error" , "le")
+	hist.Draw()
+	leg.Draw()
+	TL_cutoff.Draw()
+	TL_cutoff2.Draw()
+	TL_cutoff4.Draw()
+	TL_cutoffE.Draw()
+	c3.SaveAs("output_mc/TH2F_{}_rms_DTs.png".format(name))
+	print "{} {} {} {} {}".format(name ,cutoff, cutoff2, cutoff4, cutoffE)
+
+
+
+def drawFunction2d(hist, name, rmsRange):
+	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]/x+[1])",0,200000)
+	conv_gaussian.SetParameters(1.0, .01)
+	#conv_gaussian.SetParLimits(1, 0, 100)
+	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+	conv_gaussian.SetParNames("slope", "offset")
+
+	hist.SetMarkerStyle(8)
+
+	c3 = r.TCanvas()
+	hist.Fit("conv_gaussian","BSQ")
+	cutoff = abs((hist.GetFunction("conv_gaussian").GetParameter(0)/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff2 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*2/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoff4 = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParameter(1)))
+	cutoffE = abs((hist.GetFunction("conv_gaussian").GetParameter(0)*4/hist.GetFunction("conv_gaussian").GetParError(1)))
+
+	TL_cutoff = r.TLine(cutoff, 0, cutoff,   rmsRange)
+	TL_cutoff2 = r.TLine(cutoff2, 0, cutoff2,   rmsRange)
+	TL_cutoff4 = r.TLine(cutoff4, 0, cutoff4,   rmsRange)
+	TL_cutoffE = r.TLine(cutoffE, 0, cutoffE,   rmsRange)
+
+	TL_cutoff.SetLineColor(2)
+	TL_cutoff2.SetLineColor(3)
+	TL_cutoff4.SetLineColor(4)
+	TL_cutoffE.SetLineColor(5)
+	leg = r.TLegend(0.7,0.68,0.9,0.88)
+	leg.AddEntry(TL_cutoff, "#sigma_{rand} = #sigma_{sys}" ,"le")
+	leg.AddEntry(TL_cutoff2, "2 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoff4, "4 x #sigma_{rand} = #sigma_{sys}" , "le")
+	leg.AddEntry(TL_cutoffE, "#sigma_{rand} = #sigma_{sys} Error" , "le")
+	hist.Draw("colz")
+	leg.Draw()
+	TL_cutoff.Draw()
+	TL_cutoff2.Draw()
+	TL_cutoff4.Draw()
+	TL_cutoffE.Draw()
+	c3.SaveAs("output_mc/TH2F_{}_rms_DTs.png".format(name))
+	print "{} {} {} {} {}".format(name ,cutoff, cutoff2, cutoff4, cutoffE)
 
 
 	
@@ -278,7 +358,7 @@ full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
 #full.drawHist()
 report_array.append(full)
-hist_array[1].draw_hists()
+#hist_array[1].draw_hists()
 
 
 execfile("half.py")
@@ -309,7 +389,7 @@ super_small = ChamberInfo("super_small", reports, "super_small.xml")
 report_array.append(super_small)
 
 #hist_array.append(WheelSectorHistograms("super_small", super_small))
-super_small.drawHist()
+#super_small.drawHist()
 
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
@@ -385,20 +465,43 @@ for count, report in enumerate(report_array):
 	#TH2F_X_mean_DTs.Fill(report.totalMuons/stats_7_5_fb*7.5, abs(report.TH1F_X.GetMean()))
 
 
+
 c4 = r.TCanvas()
 TH1F_distance_histograms = []
+TH2F_distance_histograms = r.TH2F("TH2F_distance_histogram", "current- final vs stats; eqv fb; x cm", 10, 0, 20, 100, -.01, .4)
+TH2F_distance_histogram_y = r.TH2F("TH2F_distance_histogram_y", "current- final vs stats; eqv fb; y cm", 10, 0, 20, 100, -.01, .4)
+TH2F_distance_histogram_z = r.TH2F("TH2F_distance_histogram_z", "current- final vs stats; eqv fb; z cm", 10, 0, 20, 100, -.01, .4)
+TH2F_distance_histogram_phix = r.TH2F("TH2F_distance_histogram_phix", "current- final vs stats; eqv fb; #phi x cm", 10, 0, 20, 100, -.01, .4)
+TH2F_distance_histogram_phiy = r.TH2F("TH2F_distance_histogram_phiy", "current- final vs stats; eqv fb; #phi y cm", 10, 0, 20, 100, -.01, .4)
+TH2F_distance_histogram_phiz = r.TH2F("TH2F_distance_histogram_phiz", "current- final vs stats; eqv fb; #phi z cm", 10, 0, 20, 100, -.01, .4)
 
-for i in range(len(report_array)):
+
+TProfile_distance_histograms = r.TProfile("TProfile_distance_histogram", "current- final vs stats; eqv fb; x cm", 20, 0, 15)
+
+for i in range(len(report_array)-1):
 	#for j in range(len(report_array[i].chambers)):
 	TH1F_distance_histograms.append(r.TH1F("distance_histograms_{}".format(i), "distance {}".format(report_array[i].name), 100, -.08,.08) )
 
 	for j in range(len(report_array[i].chambers)):
 		#print (report_array[i-1].chambers[j-1].stats+ .0)/(full_data.chambers[j].stats+.0)*7.5, report_array[i-1].chambers[j-1].x- full.chambers[j].x
 		TH1F_distance_histograms[i].Fill(report_array[i].chambers[j].x- full.chambers[j].x )
+		if (abs(report_array[i].chambers[j].wheel) ==2 and  report_array[i].chambers[j].station == 4):
+			TH2F_distance_histograms.Fill((report_array[i].chambers[j].stats+ .0)/(full_data.chambers[j].stats+.0)*7.5, abs(report_array[i].chambers[j].x) )
+			TProfile_distance_histograms.Fill((report_array[i].chambers[j].stats+ .0)/(full_data.chambers[j].stats+.0)*7.5, abs(report_array[i].chambers[j].x- report_array[i+1].chambers[j].x) )
 
 	print report_array[i].totalMuons, TH1F_distance_histograms[i].GetRMS()
 	TH1F_distance_histograms[i].Draw()
-	c4.SaveAs("TH1F_distance_histograms_{}.png".format(i))
+	c4.SaveAs("output_mc/TH1F_distance_histograms_{}.png".format(i))
+
+TH2F_distance_histograms.Draw("colz")
+
+c4.SaveAs("output_mc/TH2F_distance_histograms.png".format(i))
+
+drawFunction2d(TH2F_distance_histograms, "TH2F_distance_histograms", .4)
+
+TProfile_distance_histograms.Draw()
+c4.SaveAs("output_mc/TProfile_distance_histograms.png".format(i))
+
 
 
 #def drawFunction(hist, name, rmsRange):
