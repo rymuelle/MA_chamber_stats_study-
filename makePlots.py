@@ -80,6 +80,16 @@ class WheelSectorHistograms:
 
 
 
+	def add(self, other_wsh):
+		for wheel in range(5):
+			for sector in range(4):
+				self.TH2F_sector_x[wheel][sector].Add(other_wsh.TH2F_sector_x[wheel][sector])
+				self.TH2F_sector_y[wheel][sector].Add(other_wsh.TH2F_sector_y[wheel][sector])
+				self.TH2F_sector_z[wheel][sector].Add(other_wsh.TH2F_sector_z[wheel][sector])
+				self.TH2F_sector_phix[wheel][sector].Add(other_wsh.TH2F_sector_phix[wheel][sector])
+				self.TH2F_sector_phiy[wheel][sector].Add(other_wsh.TH2F_sector_phiy[wheel][sector])
+				self.TH2F_sector_phiz[wheel][sector].Add(other_wsh.TH2F_sector_phiz[wheel][sector])
+				
 	def draw_hists(self):
 		for wheel in range(5):
 			for sector in range(4):
@@ -222,36 +232,54 @@ hist_array.append(WheelSectorHistograms("full", full))
 
 execfile("half.py")
 half = ChamberInfo("half", reports, "half.xml")
-hist_array.append(WheelSectorHistograms("half", half))
+#hist_array.append(WheelSectorHistograms("half", half))
 #hist_array[1].draw_hists()
 
 execfile("one_third.py")
 one_third = ChamberInfo("one_third", reports, "one_third.xml")
-hist_array.append(WheelSectorHistograms("one_third", one_third))
+#hist_array.append(WheelSectorHistograms("one_third", one_third))
 
 
 execfile("one_sixth.py")
 one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
-hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
+#hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
 
 
 
 execfile("super_small.py")
 super_small = ChamberInfo("super_small", reports, "super_small.xml")
-hist_array.append(WheelSectorHistograms("super_small", super_small))
+#hist_array.append(WheelSectorHistograms("super_small", super_small))
 
 
 execfile("superduper_small.py")
 superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
-hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
+#hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
 
 
-fileArray = ["div_16_3", "div_16_2", "div_16_1", "div_2_1", "div_16_8", "div_16_7", "div_16_6", "div_16_5", "div_16_4", "div_4_2", "div_4_1", "div_2_4", "div_2_3", "div_2_2", "div_4_4", "div_4_3", "div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
+#fileArray = ["div_16_3", "div_16_2", "div_16_1", "div_2_1", "div_16_8", "div_16_7", "div_16_6", "div_16_5", "div_16_4", "div_4_2", "div_4_1", "div_2_4", "div_2_3", "div_2_2", "div_4_4", "div_4_3", "div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
+fileArray = []
+fileArray.append(["div_16_3", "div_16_2", "div_16_1", "div_16_8", "div_16_7", "div_16_6", "div_16_5", "div_16_4"])
+fileArray.append(["div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"])
+fileArray.append([  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ])
+fileArray.append([  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ])
+#fileArray_8 = ["div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
+#fileArray_4 = [  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ]
+#fileArray_4 = [  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ]
 
-for file in fileArray:
-	execfile("{}.py".format(file))
-	name = ChamberInfo(file, reports, "{}.xml".format(file))
-	hist_array.append(WheelSectorHistograms(file, name))
+for array in fileArray:
+	count = 0
+	for file in array:
+		print count
+		execfile("{}.py".format(file))
+		name = ChamberInfo(file, reports, "{}.xml".format(file))
+		if count == 0:
+			wsh =  WheelSectorHistograms(file, name)
+		else:
+			wsh.add(WheelSectorHistograms(file, name))
+		count = count +1 
+	
+	hist_array.append(wsh)
+
 
 
 
