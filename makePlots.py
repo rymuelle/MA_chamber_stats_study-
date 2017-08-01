@@ -1,6 +1,7 @@
 import ROOT as r 
 import xml.etree.ElementTree as ET
 import math
+from array import array
 
 r.gStyle.SetOptStat(0)
 r.gROOT.SetBatch(True)
@@ -41,7 +42,7 @@ class ChamberInfo:
 					count = count + 1
 				
 		#for count, chamber in enumerate(self.chambers):
-		#	print chamber.detector, chamber.wheel, chamber.station, chamber.sector, chamber.stats, chamber.x
+		#   print chamber.detector, chamber.wheel, chamber.station, chamber.sector, chamber.stats, chamber.x
 
 
 class WheelSectorHistograms:
@@ -70,12 +71,12 @@ class WheelSectorHistograms:
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
-			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
-			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
-			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
-			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
-			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.x)))
+			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.y)))
+			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.z)))
+			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.phix)))
+			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.phiy)))
+			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), abs(float(chamber.phiz)))
 
 
 
@@ -109,7 +110,19 @@ class WheelSectorHistograms:
 				#print self.TH2F_sector_x[wheel][sector].GetRMS()
 
 	#def getRMSStats(self,wheel, sector):
-	#	return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
+	#   return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
+
+	def getMedianofAbs(self, histogram):
+		nq = 5
+		xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
+		yq1 = array('d', [0.] * nq)  # array to contain the quantiles
+
+		for i in xrange(nq):
+			xq[i] = float(i + 1) / nq
+		histogram.GetQuantiles(nq, yq1, xq)
+		print "hi", yq1
+		return  yq1[2]
+
 
 	def getMeanStats(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
@@ -118,22 +131,29 @@ class WheelSectorHistograms:
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMeanError(1)
 
 	def getRMSX(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+
+		return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSY(self,wheel, sector):
-		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+		return self.getMedianofAbs(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSZ(self,wheel, sector):
-		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+		return self.getMedianofAbs(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIX(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+		return self.getMedianofAbs(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIY(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+		return self.getMedianofAbs(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIZ(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
+		#return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
+		return self.getMedianofAbs(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()) 
 
 
 	def getRMSXError(self,wheel, sector):
@@ -184,7 +204,7 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 				#exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel-2,sector+1)".format(name)
 				#exec(exception_catch_rms)
 				#if  rms_value > rms_range:
-				#	print "out of range"
+				#   print "out of range"
 
 
 			TGraph_stats_v_rms[sector][wheel].SetMarkerStyle(8)
@@ -266,9 +286,9 @@ fileArray.append([  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ])
 #fileArray_4 = [  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ]
 #fileArray_4 = [  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ]
 
-for array in fileArray:
+for l_array in fileArray:
 	count = 0
-	for file in array:
+	for file in l_array:
 		print count
 		execfile("{}.py".format(file))
 		name = ChamberInfo(file, reports, "{}.xml".format(file))
