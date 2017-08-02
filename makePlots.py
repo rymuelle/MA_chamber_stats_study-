@@ -46,7 +46,7 @@ class ChamberInfo:
 
 
 class WheelSectorHistograms:
-	def __init__(self, name, chamber_class):
+	def __init__(self, name, chamber_class, ref_chambers, ref_lumi):
 		self.name = name
 		self.TH2F_sector_x = []
 		self.TH2F_sector_y = []
@@ -62,21 +62,23 @@ class WheelSectorHistograms:
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel,station+1),"#phi x wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel,station+1),"#phi ywheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel,station+1),"#phi zwheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel,station+1),"#phi x wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.02,.02 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel,station+1),"#phi ywheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.02,.02 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel,station+1),"#phi zwheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.02,.02 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
+			#print ref_chambers.chambers[count].wheel, ref_chambers.chambers[count].station, chamber.wheel, chamber.station
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH2F_sector_x[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
-			self.TH2F_sector_y[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
-			self.TH2F_sector_z[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
-			self.TH2F_sector_phix[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
-			self.TH2F_sector_phiy[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
-			self.TH2F_sector_phiz[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+			eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
+			self.TH2F_sector_x[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.x))
+			self.TH2F_sector_y[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.y))
+			self.TH2F_sector_z[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.z))
+			self.TH2F_sector_phix[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.phix))
+			self.TH2F_sector_phiy[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.phiy))
+			self.TH2F_sector_phiz[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.phiz))
 
 
 
@@ -205,21 +207,26 @@ class WheelSectorHistograms:
 		return self.TH2F_sector_phiz[wheel][sector-1].GetRMSError(2)
 
 def make2dStatsPlots(hist_array, name, rms_range, output):
-	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]^2/x+[1]^2)",0,200000)
+	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]*10^-4/x+[1]*10^-4)",0,10)
 	conv_gaussian.SetParameters(1.0, .01)
 	conv_gaussian.SetParNames("slope", "offset")
+	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+	TGraph_cutoffs = r.TGraphErrors()
 	colorArray = [1,2,3,4,6]
 	TH2F_stats_v_rms = []
 	TGraph_stats_v_rms = []
 	TLine_cutoff = []
+	fit = []
 	for sector in range(4):
 		color = 0
 		TH2F_stats_v_rms.append([])
 		TGraph_stats_v_rms.append([])
-		TLine_cutoff.append([])
+		fit.append([])
 		for wheel in range(3):
 			TGraph_stats_v_rms[sector].append (r.TGraphErrors())
 			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), 100, 0, 200000, 100, 0, rms_range))
+
 			#for hist in enumerate(hist_array):
 			for count in range(len(hist_array)):
 				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel,sector+1),hist_array[count].getRMS{}(wheel,sector+1))".format(name)
@@ -239,21 +246,47 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 
 			TGraph_stats_v_rms[sector][wheel].SetMarkerStyle(8)
 			TGraph_stats_v_rms[sector][wheel].SetMarkerColor(colorArray[color])
-			TGraph_stats_v_rms[sector][wheel].Fit("conv_gaussian", "Q") 
-			cutoff = math.pow((TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
-			print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel, sector+1, cutoff)
-			TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,rms_range))
-			TLine_cutoff[sector][wheel].SetLineColor(colorArray[color])
-			TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(colorArray[color])
-			TGraph_stats_v_rms[sector][wheel].SetLineColor(colorArray[color])
+			fit[sector].append(TGraph_stats_v_rms[sector][wheel].Fit("conv_gaussian", "QS") )
+			#cutoff = math.pow((TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
+			#print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel, sector+1, cutoff)
+			#TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,rms_range))
+			#TLine_cutoff[sector][wheel].SetLineColor(colorArray[color])
+			#TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(colorArray[color])
+			#TGraph_stats_v_rms[sector][wheel].SetLineColor(colorArray[color])
 			color = color + 1
 	
 	multigraph = []
 	for sector in range(4):
+		color = 0
 		multigraph.append(r.TMultiGraph())
 		legend =  r.TLegend(0.82,0.68,0.9,0.88)
+		TLine_cutoff.append([])
 		for wheel in range(3):
 			multigraph[sector].Add(TGraph_stats_v_rms[sector][wheel])
+		for wheel in range(3):
+			cutoff = math.pow((TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),1)
+			#print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel, sector+1, cutoff)
+			covMatrix =  fit[sector][wheel].GetCovarianceMatrix()
+			#print covMatrix[0][0], covMatrix[1][0], covMatrix[1][1]
+			sigma0, sigma10, sigma1 = covMatrix[0][0], covMatrix[1][0], covMatrix[1][1]
+			par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
+			#print sigma0, sigma1, sigma10
+			error = math.pow(abs(cutoff),1)*( math.pow(sigma0/par0,2) +math.pow(sigma1/par1,2) - 2*sigma10/(par0*par1) )
+			if error > 0:
+				error = math.sqrt(error)
+			else : error = 0
+
+			print "cuttoff for {} RMS /{}/{}: {} +/- {}".format(name, wheel, sector+1, cutoff, error)
+			#print math.sqrt(covMatrix[0][0]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0)
+			#print math.sqrt(covMatrix[1][1]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)
+			TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,1))
+			TLine_cutoff[sector][wheel].SetLineColor(colorArray[color])
+			TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(colorArray[color])
+			TGraph_stats_v_rms[sector][wheel].SetLineColor(colorArray[color])
+			point_count = TGraph_cutoffs.GetN()
+			TGraph_cutoffs.SetPoint(point_count, cutoff, wheel)
+			TGraph_cutoffs.SetPointError(point_count, error, 0)
+			color = color + 1
 			
 			
 		multigraph[sector].Draw("AP")
@@ -262,6 +295,8 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 			legend.AddEntry(TGraph_stats_v_rms[sector][wheel], "{} {}".format( wheel, sector+1), "lep")
 		legend.Draw()
 		c1.SaveAs("{}/TGraph_stats_v_rms_{}_sector{}.png".format(output,name, sector+1))
+	TGraph_cutoffs.Draw()
+	c1.SaveAs("{}/TGraph_cutoffs_{}.png".format(output,name, sector+1))
 		
 
 
@@ -282,7 +317,7 @@ full_data = ChamberInfo("full_data", reports, "full_data.xml")
 
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
-hist_array.append(WheelSectorHistograms("full", full))
+hist_array.append(WheelSectorHistograms("full", full, full_data, 7.5))
 
 #execfile("half.py")
 #half = ChamberInfo("half", reports, "half.xml")
@@ -327,9 +362,9 @@ for l_array in fileArray:
 		execfile("{}.py".format(file))
 		name = ChamberInfo(file, reports, "{}.xml".format(file))
 		if count == 0:
-			wsh =  WheelSectorHistograms(file, name)
+			wsh =  WheelSectorHistograms(file, name, full_data, 7.5)
 		else:
-			wsh.add(WheelSectorHistograms(file, name))
+			wsh.add(WheelSectorHistograms(file, name, full_data, 7.5))
 		count = count +1 
 	
 	hist_array.append(wsh)
