@@ -8,10 +8,6 @@ r.gROOT.SetBatch(True)
 
 c1 = r.TCanvas()
 
-def fitCut(hist, sigmas, opts):
-    lower, upper = hist.GetMean()-sigmas*hist.GetRMS(), hist.GetMean()+sigmas*hist.GetRMS()
-    hist.Fit("gaus",opts, "", lower, upper)
-
 class Chamber:
 	def __init__(self, report, child):
 		self.detector = report.postal_address[0]
@@ -66,21 +62,21 @@ class WheelSectorHistograms:
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
-			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
-			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
-			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
-			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
-			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+			self.TH2F_sector_x[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
+			self.TH2F_sector_y[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
+			self.TH2F_sector_z[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
+			self.TH2F_sector_phix[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
+			self.TH2F_sector_phiy[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
+			self.TH2F_sector_phiz[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
 
 
 
@@ -98,36 +94,18 @@ class WheelSectorHistograms:
 	def draw_hists(self):
 		for wheel in range(5):
 			for sector in range(4):
-
-				fit_hist_x = self.TH2F_sector_x[wheel][sector].ProjectionY()
-				fitCut(fit_hist_x, 1.5, "QC")
-				fit_hist_x.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
-
-				fit_hist_y = self.TH2F_sector_y[wheel][sector].ProjectionY()
-				fitCut(fit_hist_y, 1.5, "QC")
-				fit_hist_y.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
-
-				fit_hist_z = self.TH2F_sector_z[wheel][sector].ProjectionY()
-				fitCut(fit_hist_z, 1.5, "QC")
-				fit_hist_z.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
-
-				fit_hist_phix = self.TH2F_sector_phix[wheel][sector].ProjectionY()
-				fitCut(fit_hist_phix, 1.5, "QC")
-				fit_hist_phix.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
-
-				fit_hist_phiy = self.TH2F_sector_phiy[wheel][sector].ProjectionY()
-				fitCut(fit_hist_phiy, 1.5, "QC")
-				fit_hist_phiy.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
-
-				fit_hist_phiz = self.TH2F_sector_phiz[wheel][sector].ProjectionY()
-				fitCut(fit_hist_phiz, 1.5, "QC")
-				fit_hist_phiz.Draw()
-				c1.SaveAs("output_mc_2/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_x[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_y[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_z[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phix[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiy[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
+				self.TH2F_sector_phiz[wheel][sector].Draw()
+				c1.SaveAs("output/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
 
 				#print self.TH2F_sector_x[wheel][sector].GetRMS()
 
@@ -145,6 +123,16 @@ class WheelSectorHistograms:
 		print "hi", yq1
 		return  yq1[2]
 
+	def getQuantilesAbs(self, histogram, nq):
+		xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
+		yq1 = array('d', [0.] * nq)  # array to contain the quantiles
+
+		for i in xrange(nq):
+			xq[i] = float(i + 1) / nq
+		histogram.GetQuantiles(nq, yq1, xq)
+		#print "hi", yq1
+		return  yq1
+
 
 	def getMeanStats(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
@@ -152,64 +140,51 @@ class WheelSectorHistograms:
 	def getMeanStatsError(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMeanError(1)
 
-	def getFitX(self,wheel, sector, sigmas):
-		fit_hist_x = self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()
-		print fit_hist_x.GetEntries()
-		fitCut(fit_hist_x, sigmas, "QC")
-		return fit_hist_x.GetFunction("gaus").GetParameter(2)
+	def getRMSOutlierProtected(self,hist, count):
+		yq = self.getQuantilesAbs(hist, count)
+		temp_hist = hist
+		#print temp_hist.GetRMS()
+		temp_hist.GetXaxis().SetRangeUser(yq[1], yq[count-2])
+		#print temp_hist.GetRMS()
+		return temp_hist.GetRMS()
 
-	def getFitY(self,wheel, sector, sigmas):
-		fit_hist_y = self.TH2F_sector_y[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_y, sigmas, "QC")
-		return fit_hist_y.GetFunction("gaus").GetParameter(2)
+	def getRMSProtectedX(self,wheel, sector):
+		return self.getRMSOutlierProtected(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY(),10)
 
-	def getFitZ(self,wheel, sector, sigmas):
-		fit_hist_z = self.TH2F_sector_z[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_z, sigmas, "QC")
-		return fit_hist_z.GetFunction("gaus").GetParameter(2)
+		#return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
 
-	def getFitPHIX(self,wheel, sector, sigmas):
-		fit_hist_phix = self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phix, sigmas, "QC")
-		return fit_hist_phix.GetFunction("gaus").GetParameter(2)
+	def getRMSProtectedY(self,wheel, sector):
+		return self.getRMSOutlierProtected(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY(),10)
 
-	def getFitPHIY(self,wheel, sector, sigmas):
-		fit_hist_phiy = self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phiy, sigmas, "QC")
-		return fit_hist_phiy.GetFunction("gaus").GetParameter(2)
+	def getRMSProtectedZ(self,wheel, sector):
+		return self.getRMSOutlierProtected(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY(),10)
 
-	def getFitPHIZ(self,wheel, sector, sigmas):
-		fit_hist_phiz = self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phiz, sigmas, "QC")
-		return fit_hist_phiz.GetFunction("gaus").GetParameter(2)
+	def getRMSProtectedPHIX(self,wheel, sector):
+		return self.getRMSOutlierProtected(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY(),10)
 
+	def getRMSProtectedPHIY(self,wheel, sector):		
+		return self.getRMSOutlierProtected(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY(),10)
 
+	def getRMSProtectedPHIZ(self,wheel, sector):
+		return self.getRMSOutlierProtected(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY(),10)
 
 	def getRMSX(self,wheel, sector):
-		#return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
-
-		return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
 
 	def getRMSY(self,wheel, sector):
-		#return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
 
 	def getRMSZ(self,wheel, sector):
-		#return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
 
 	def getRMSPHIX(self,wheel, sector):
-		#return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
 
 	def getRMSPHIY(self,wheel, sector):
-		#return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
 
 	def getRMSPHIZ(self,wheel, sector):
-		#return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()) 
-
+		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
 
 	def getRMSXError(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetRMSError(2)
@@ -249,7 +224,7 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 			for count in range(len(hist_array)):
 				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMS{}(wheel-2,sector+1))".format(name)
 				stats, statsError = hist_array[count].getMeanStats(wheel-2,sector+1), hist_array[count].getMeanStatsError(wheel-2,sector+1)
-				rms_command = "rms, rmsError = hist_array[count].getFit{}(wheel-2,sector+1, 1.5), hist_array[count].getRMS{}Error(wheel-2,sector+1)".format(name,name)
+				rms_command = "rms, rmsError = hist_array[count].getRMSProtected{}(wheel-2,sector+1), hist_array[count].getRMS{}Error(wheel-2,sector+1)".format(name,name)
 				exec(rms_command)
 				point_count = TGraph_stats_v_rms[sector][wheel].GetN()
 				TGraph_stats_v_rms[sector][wheel].SetPoint(point_count, stats, rms)
@@ -294,40 +269,44 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 	
 hist_array = []
 
-execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
-example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
+#execfile("mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01_report.py")
+#example = ChamberInfo("test", reports, "mc_DT-1100-111111_CMSSW_9_2_1_13TeV_39M_01.xml")
 
-hist_array.append(WheelSectorHistograms("example", example))
+#hist_array.append(WheelSectorHistograms("example", example))
 
 #example2.draw_hists()
+
+execfile("full_data.py")
+full_data = ChamberInfo("full_data", reports, "full_data.xml")
+stats_7_5_fb = full_data.totalMuons
 
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
 hist_array.append(WheelSectorHistograms("full", full))
 
-execfile("half.py")
-half = ChamberInfo("half", reports, "half.xml")
-#hist_array.append(WheelSectorHistograms("half", half))
-#hist_array[1].draw_hists()
-
-execfile("one_third.py")
-one_third = ChamberInfo("one_third", reports, "one_third.xml")
-#hist_array.append(WheelSectorHistograms("one_third", one_third))
-
-
-execfile("one_sixth.py")
-one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
-#hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
-
-
-
-execfile("super_small.py")
-super_small = ChamberInfo("super_small", reports, "super_small.xml")
-#hist_array.append(WheelSectorHistograms("super_small", super_small))
-
-
-execfile("superduper_small.py")
-superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
+#execfile("half.py")
+#half = ChamberInfo("half", reports, "half.xml")
+##hist_array.append(WheelSectorHistograms("half", half))
+##hist_array[1].draw_hists()
+#
+#execfile("one_third.py")
+#one_third = ChamberInfo("one_third", reports, "one_third.xml")
+##hist_array.append(WheelSectorHistograms("one_third", one_third))
+#
+#
+#execfile("one_sixth.py")
+#one_sixth = ChamberInfo("one_sixth", reports, "one_sixth.xml")
+##hist_array.append(WheelSectorHistograms("one_sixth", one_sixth))
+#
+#
+#
+#execfile("super_small.py")
+#super_small = ChamberInfo("super_small", reports, "super_small.xml")
+##hist_array.append(WheelSectorHistograms("super_small", super_small))
+#
+#
+#execfile("superduper_small.py")
+#superduper_small = ChamberInfo("superduper_small", reports, "superduper_small.xml")
 #hist_array.append(WheelSectorHistograms("superduper_small", superduper_small))
 
 
@@ -352,7 +331,6 @@ for l_array in fileArray:
 		else:
 			wsh.add(WheelSectorHistograms(file, name))
 		count = count +1 
-	#wsh.draw_hists()
 	
 	hist_array.append(wsh)
 
@@ -370,6 +348,5 @@ make2dStatsPlots(hist_array, "PHIX", .03,"output_mc_2")
 make2dStatsPlots(hist_array, "PHIY", .014,"output_mc_2")
 make2dStatsPlots(hist_array, "PHIZ", .002,"output_mc_2")
 		
-
 
 
