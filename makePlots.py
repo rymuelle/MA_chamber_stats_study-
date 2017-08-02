@@ -54,7 +54,7 @@ class WheelSectorHistograms:
 		self.TH2F_sector_phix = []
 		self.TH2F_sector_phiy = []
 		self.TH2F_sector_phiz = []
-		for wheel in range(5):
+		for wheel in range(3):
 			self.TH2F_sector_x.append([])
 			self.TH2F_sector_y.append([])
 			self.TH2F_sector_z.append([])
@@ -62,27 +62,27 @@ class WheelSectorHistograms:
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.3,.3 ) )
-				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.3,.3 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel,station+1),"#phi x wheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel,station+1),"#phi ywheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel,station+1),"#phi zwheel {} station {}".format(wheel,station+1), 100, 0, 500000, 100, -.02,.02 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH2F_sector_x[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
-			self.TH2F_sector_y[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
-			self.TH2F_sector_z[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
-			self.TH2F_sector_phix[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
-			self.TH2F_sector_phiy[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
-			self.TH2F_sector_phiz[abs(chamber.wheel)+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+			self.TH2F_sector_x[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
+			self.TH2F_sector_y[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
+			self.TH2F_sector_z[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
+			self.TH2F_sector_phix[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
+			self.TH2F_sector_phiy[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
+			self.TH2F_sector_phiz[abs(chamber.wheel)][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
 
 
 
 
 	def add(self, other_wsh):
-		for wheel in range(5):
+		for wheel in range(3):
 			for sector in range(4):
 				self.TH2F_sector_x[wheel][sector].Add(other_wsh.TH2F_sector_x[wheel][sector])
 				self.TH2F_sector_y[wheel][sector].Add(other_wsh.TH2F_sector_y[wheel][sector])
@@ -92,20 +92,20 @@ class WheelSectorHistograms:
 				self.TH2F_sector_phiz[wheel][sector].Add(other_wsh.TH2F_sector_phiz[wheel][sector])
 				
 	def draw_hists(self):
-		for wheel in range(5):
+		for wheel in range(3):
 			for sector in range(4):
 				self.TH2F_sector_x[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector+1))
 				self.TH2F_sector_y[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel,sector+1))
 				self.TH2F_sector_z[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel,sector+1))
 				self.TH2F_sector_phix[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel,sector+1))
 				self.TH2F_sector_phiy[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel,sector+1))
 				self.TH2F_sector_phiz[wheel][sector].Draw()
-				c1.SaveAs("output/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel-2,sector+1))
+				c1.SaveAs("output/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel,sector+1))
 
 				#print self.TH2F_sector_x[wheel][sector].GetRMS()
 
@@ -135,10 +135,10 @@ class WheelSectorHistograms:
 
 
 	def getMeanStats(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetMean(1)
+		return self.TH2F_sector_x[wheel][sector-1].GetMean(1)
 
 	def getMeanStatsError(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetMeanError(1)
+		return self.TH2F_sector_x[wheel][sector-1].GetMeanError(1)
 
 	def getRMSOutlierProtected(self,hist, count):
 		yq = self.getQuantilesAbs(hist, count)
@@ -149,60 +149,60 @@ class WheelSectorHistograms:
 		return temp_hist.GetRMS()
 
 	def getRMSProtectedX(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_x[wheel][sector-1].ProjectionY(),10)
 
-		#return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
+		#return self.getMedianofAbs(self.TH2F_sector_x[wheel][sector-1].ProjectionY()) 
 
 	def getRMSProtectedY(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_y[wheel][sector-1].ProjectionY(),10)
 
 	def getRMSProtectedZ(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_z[wheel][sector-1].ProjectionY(),10)
 
 	def getRMSProtectedPHIX(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_phix[wheel][sector-1].ProjectionY(),10)
 
 	def getRMSProtectedPHIY(self,wheel, sector):		
-		return self.getRMSOutlierProtected(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_phiy[wheel][sector-1].ProjectionY(),10)
 
 	def getRMSProtectedPHIZ(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY(),10)
+		return self.getRMSOutlierProtected(self.TH2F_sector_phiz[wheel][sector-1].ProjectionY(),10)
 
 	def getRMSX(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_x[wheel][sector-1].GetRMS(2)
 
 	def getRMSY(self,wheel, sector):
-		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_y[wheel][sector-1].GetRMS(2)
 
 	def getRMSZ(self,wheel, sector):
-		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_z[wheel][sector-1].GetRMS(2)
 
 	def getRMSPHIX(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_phix[wheel][sector-1].GetRMS(2)
 
 	def getRMSPHIY(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_phiy[wheel][sector-1].GetRMS(2)
 
 	def getRMSPHIZ(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_phiz[wheel][sector-1].GetRMSError(2)
 
 	def getRMSXError(self,wheel, sector):
-		return self.TH2F_sector_x[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_x[wheel][sector-1].GetRMSError(2)
 
 	def getRMSYError(self,wheel, sector):
-		return self.TH2F_sector_y[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_y[wheel][sector-1].GetRMSError(2)
 
 	def getRMSZError(self,wheel, sector):
-		return self.TH2F_sector_z[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_z[wheel][sector-1].GetRMSError(2)
 
 	def getRMSPHIXError(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_phix[wheel][sector-1].GetRMSError(2)
 
 	def getRMSPHIYError(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_phiy[wheel][sector-1].GetRMSError(2)
 
 	def getRMSPHIZError(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
+		return self.TH2F_sector_phiz[wheel][sector-1].GetRMSError(2)
 
 def make2dStatsPlots(hist_array, name, rms_range, output):
 	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]^2/x+[1]^2)",0,200000)
@@ -217,21 +217,21 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 		TH2F_stats_v_rms.append([])
 		TGraph_stats_v_rms.append([])
 		TLine_cutoff.append([])
-		for wheel in range(5):
+		for wheel in range(3):
 			TGraph_stats_v_rms[sector].append (r.TGraphErrors())
-			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), 100, 0, 200000, 100, 0, rms_range))
+			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), 100, 0, 200000, 100, 0, rms_range))
 			#for hist in enumerate(hist_array):
 			for count in range(len(hist_array)):
-				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel-2,sector+1),hist_array[count].getRMS{}(wheel-2,sector+1))".format(name)
-				stats, statsError = hist_array[count].getMeanStats(wheel-2,sector+1), hist_array[count].getMeanStatsError(wheel-2,sector+1)
-				rms_command = "rms, rmsError = hist_array[count].getRMSProtected{}(wheel-2,sector+1), hist_array[count].getRMS{}Error(wheel-2,sector+1)".format(name,name)
+				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel,sector+1),hist_array[count].getRMS{}(wheel,sector+1))".format(name)
+				stats, statsError = hist_array[count].getMeanStats(wheel,sector+1), hist_array[count].getMeanStatsError(wheel,sector+1)
+				rms_command = "rms, rmsError = hist_array[count].getRMSProtected{}(wheel,sector+1), hist_array[count].getRMS{}Error(wheel,sector+1)".format(name,name)
 				exec(rms_command)
 				point_count = TGraph_stats_v_rms[sector][wheel].GetN()
 				TGraph_stats_v_rms[sector][wheel].SetPoint(point_count, stats, rms)
 				TGraph_stats_v_rms[sector][wheel].SetPointError(point_count, statsError, rmsError)
 				
 				
-				#exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel-2,sector+1)".format(name)
+				#exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel,sector+1)".format(name)
 				#exec(exception_catch_rms)
 				#if  rms_value > rms_range:
 				#   print "out of range"
@@ -241,7 +241,7 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 			TGraph_stats_v_rms[sector][wheel].SetMarkerColor(colorArray[color])
 			TGraph_stats_v_rms[sector][wheel].Fit("conv_gaussian", "Q") 
 			cutoff = math.pow((TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0)/TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)),2)
-			print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel-2, sector+1, cutoff)
+			print "cuttoff for {} RMS /{}/{}: {}".format(name, wheel, sector+1, cutoff)
 			TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,rms_range))
 			TLine_cutoff[sector][wheel].SetLineColor(colorArray[color])
 			TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").SetLineColor(colorArray[color])
@@ -252,14 +252,14 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 	for sector in range(4):
 		multigraph.append(r.TMultiGraph())
 		legend =  r.TLegend(0.82,0.68,0.9,0.88)
-		for wheel in range(5):
+		for wheel in range(3):
 			multigraph[sector].Add(TGraph_stats_v_rms[sector][wheel])
 			
 			
 		multigraph[sector].Draw("AP")
-		for wheel in range(5):
+		for wheel in range(3):
 			TLine_cutoff[sector][wheel].Draw()
-			legend.AddEntry(TGraph_stats_v_rms[sector][wheel], "{} {}".format( wheel -2, sector+1), "lep")
+			legend.AddEntry(TGraph_stats_v_rms[sector][wheel], "{} {}".format( wheel, sector+1), "lep")
 		legend.Draw()
 		c1.SaveAs("{}/TGraph_stats_v_rms_{}_sector{}.png".format(output,name, sector+1))
 		
@@ -278,7 +278,7 @@ hist_array = []
 
 execfile("full_data.py")
 full_data = ChamberInfo("full_data", reports, "full_data.xml")
-stats_7_5_fb = full_data.totalMuons
+#stats_7_5_fb = full_data.totalMuons
 
 execfile("full.py")
 full = ChamberInfo("full", reports, "full.xml")
