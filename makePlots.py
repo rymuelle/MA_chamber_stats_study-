@@ -26,7 +26,7 @@ full_data = wsh.ChamberInfo("full_data", reports, "full_data.xml")
 execfile("full.py")
 full = wsh.ChamberInfo("full", reports, "full.xml")
 hist_array.append(wsh.WheelSectorHistograms("full", full, full_data, 7.5))
-hist_array5.append(wsh.WheelSectorHistograms5("full", full))
+hist_array5.append(wsh.WheelSectorHistograms5("full", full, full_data, 7.5))
 
 #execfile("half.py")
 #half = wsh.ChamberInfo("half", reports, "half.xml")
@@ -72,12 +72,12 @@ for l_array in fileArray:
 		name = wsh.ChamberInfo(file, reports, "{}.xml".format(file))
 		if count == 0:
 			l_wsh =  wsh.WheelSectorHistograms(file, name, full_data, 7.5)
-			l_wsh5 =  wsh.WheelSectorHistograms5(file, name)
+			l_wsh5 =  wsh.WheelSectorHistograms5(file, name, full_data, 7.5)
 		else:
 			l_wsh.add(wsh.WheelSectorHistograms(file, name, full_data, 7.5))
-			l_wsh5.add(wsh.WheelSectorHistograms5(file, name))
+			l_wsh5.add(wsh.WheelSectorHistograms5(file, name, full_data, 7.5))
 		count = count +1 
-	l_wsh.draw_hists()
+	#l_wsh.draw_hists()
 	
 	hist_array.append(l_wsh)
 	hist_array5.append(l_wsh5)
@@ -92,9 +92,9 @@ for l_array in fileArray:
 makeplots.make2dStatsPlots(hist_array, "X", .1,"output_mc_2")
 makeplots.make2dStatsPlots(hist_array, "Y", .3,"output_mc_2")
 makeplots.make2dStatsPlots(hist_array, "Z", .3,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array, "PHIX", .03,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array, "PHIY", .014,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array, "PHIZ", .002,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2")
 		
 
 

@@ -60,9 +60,9 @@ class WheelSectorHistograms:
 			self.TH2F_sector_y.append([])
 			self.TH2F_sector_z.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*2, 100, -.3,.3 ) )		
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.3,.3 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.3,.3 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.3,.3 ) )		
 
 		for wheel in range(5):
 					self.TH2F_sector_phix.append([])
@@ -238,7 +238,7 @@ class WheelSectorHistograms:
 
 
 class WheelSectorHistograms5:
-	def __init__(self, name, chamber_class):
+	def __init__(self, name, chamber_class, ref_chambers, ref_lumi):
 		self.name = name + "5"
 		self.TH2F_sector_x = []
 		self.TH2F_sector_y = []
@@ -254,21 +254,22 @@ class WheelSectorHistograms5:
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.5,.5 ) )
-				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
-				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.02,.02 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.02,.02 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.02,.02 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.02,.02 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.x))
-			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.y))
-			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.z))
-			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phix))
-			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiy))
-			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(chamber.stats), float(chamber.phiz))
+			eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
+			self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
+			self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y))
+			self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.z))
+			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phix))
+			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiy))
+			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiz))
 
 
 
@@ -374,29 +375,29 @@ class WheelSectorHistograms5:
 
 
 	def getRMSX(self,wheel, sector):
-		#return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
+		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
 
-		return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
+		#return self.getMedianofAbs(self.TH2F_sector_x[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSY(self,wheel, sector):
-		#return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_y[wheel+2][sector-1].GetRMS(2)
+		#return self.getMedianofAbs(self.TH2F_sector_y[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSZ(self,wheel, sector):
-		#return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_z[wheel+2][sector-1].GetRMS(2)
+		#return self.getMedianofAbs(self.TH2F_sector_z[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIX(self,wheel, sector):
-		#return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
+		#return self.getMedianofAbs(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIY(self,wheel, sector):
-		#return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
+		#return self.getMedianofAbs(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()) 
 
 	def getRMSPHIZ(self,wheel, sector):
-		#return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
-		return self.getMedianofAbs(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()) 
+		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMS(2)
+		#return self.getMedianofAbs(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()) 
 
 
 	def getRMSXError(self,wheel, sector):
