@@ -16,7 +16,11 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
 	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
 	TGraph_cutoffs = r.TGraphErrors()
-	TH1F_cutoffs = r.TH1F("TH1F_cutoffs_{}".format(name), "{} cutoff values; {} rms".format(name,name), 100, 0, 20)
+	TH1F_cutoffs = r.TH1F("TH1F_cutoffs_{}".format(name), "{} cutoff values; {} rms".format(name,name), 100, 0, 100)
+	TH2F_cutoffs = r.TH2F("TH2F_cutoffs_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 3, 0,2, 4, 1,4)
+	TH2F_cutoffs_text = r.TH2F("TH2F_cutoffs_text_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 3, 0,2, 4, 1,4)
+	TH2F_rand = r.TH2F("TH2F_rand_{}".format(name), "{} random values in Luminosity;  wheel; sectors".format(name), 3, 0,2, 4, 1,4)
+	TH2F_sys = r.TH2F("TH2F_sys_{}".format(name), "{} sys values in Luminosity;  wheel; sectors".format(name), 3, 0,2, 4, 1,4)
 	colorArray = [1,2,3,4,6]
 	TH2F_stats_v_rms = []
 	TGraph_stats_v_rms = []
@@ -97,7 +101,14 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 			point_count = TGraph_cutoffs.GetN()
 			TGraph_cutoffs.SetPoint(point_count, cutoff, wheel)
 			TGraph_cutoffs.SetPointError(point_count, error, 0)
-			if error < 15:  TH1F_cutoffs.Fill(cutoff*4)
+			TH2F_rand.SetBinContent(wheel + 1, sector +1, par0)
+			TH2F_sys.SetBinContent(wheel + 1, sector +1, par1)
+			if error < 15:  
+				TH1F_cutoffs.Fill(cutoff*4)
+				
+				TH2F_cutoffs.SetBinContent(wheel + 1, sector +1, cutoff)
+			TH2F_cutoffs_text.SetBinContent(wheel + 1, sector +1, cutoff)
+				#print cutoff, wheel, sector+1
 			color = color + 1
 			
 			
@@ -113,6 +124,19 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 	TH1F_cutoffs.Draw()
 	c2.SaveAs("{}/TH1F_cutoffs_{}.png".format(output,name, sector+1))
 
+	TH2F_cutoffs.Draw("colz")
+	TH2F_cutoffs_text.Draw("same TEXT")
+	TH2F_cutoffs_text.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_cutoffs_{}.png".format(output,name, sector+1))
+	TH2F_rand.Draw("colz TEXT")
+	TH2F_rand.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_rand{}.png".format(output,name, sector+1))
+	TH2F_sys.Draw("colz TEXT")
+	TH2F_sys.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_sys{}.png".format(output,name, sector+1))
+
+	print "{} Safe by: {} +/- {}".format(name, 1*(TH1F_cutoffs.GetMean() ), 1*TH1F_cutoffs.GetMeanError(),2   )
+
 
 
 
@@ -123,7 +147,11 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
 	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
 	TGraph_cutoffs = r.TGraphErrors()
-	TH1F_cutoffs = r.TH1F("TH1F_cutoffs_{}".format(name), "{} cutoff values; {} rms".format(name,name), 100, 0, 20)
+	TH2F_cutoffs = r.TH2F("TH2F_cutoffs_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
+	TH2F_cutoffs_text = r.TH2F("TH2F_cutoffs_text_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
+	TH2F_rand = r.TH2F("TH2F_rand_{}".format(name), "{} random values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
+	TH2F_sys = r.TH2F("TH2F_sys_{}".format(name), "{} sys values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
+	TH1F_cutoffs = r.TH1F("TH1F_cutoffs_{}".format(name), "{} cutoff values; {} rms".format(name,name), 100, 0, 100)
 	colorArray = [1,2,3,4,6]
 	TH2F_stats_v_rms = []
 	TGraph_stats_v_rms = []
@@ -200,6 +228,7 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 			#print math.sqrt(covMatrix[0][0]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0)
 			#print math.sqrt(covMatrix[1][1]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)
 
+
 			TLine_cutoff[sector].append(r.TLine(cutoff,0,cutoff,maxY/2.0))
 			TLine_cutoff[sector][wheel].SetLineColor(colorArray[color])
 			TLine_cutoff_error[sector].append(r.TLine(cutoff-error,maxY/2.0,cutoff+error,maxY/2.0))
@@ -213,7 +242,13 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 			point_count = TGraph_cutoffs.GetN()
 			TGraph_cutoffs.SetPoint(point_count, cutoff, wheel)
 			TGraph_cutoffs.SetPointError(point_count, error, 0)
-			if error < 15:  TH1F_cutoffs.Fill(cutoff*4)
+			TH2F_rand.SetBinContent(wheel + 1, sector +1, par0)
+			TH2F_sys.SetBinContent(wheel + 1, sector +1, par1)
+			if error < 15: 
+				TH1F_cutoffs.Fill(cutoff*4)
+				TH2F_cutoffs.SetBinContent(wheel+1, sector+1 , cutoff)
+			TH2F_cutoffs_text.SetBinContent(wheel+1, sector+1 , cutoff)
+				#print cutoff, wheel-2, sector+1
 			color = color + 1
 			
 			
@@ -228,5 +263,18 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 	c2.SaveAs("{}/TGraph_cutoffs_{}.png".format(output,name, sector+1))
 	TH1F_cutoffs.Draw()
 	c2.SaveAs("{}/TH1F_cutoffs_{}.png".format(output,name, sector+1))
+
+	TH2F_cutoffs.Draw("colz")
+	TH2F_cutoffs_text.Draw("same TEXT")
+	TH2F_cutoffs_text.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_cutoffs_{}.png".format(output,name, sector+1))
+	TH2F_rand.Draw("colz TEXT")
+	TH2F_rand.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_rand{}.png".format(output,name, sector+1))
+	TH2F_sys.Draw("colz TEXT")
+	TH2F_sys.SetMarkerSize(2)
+	c2.SaveAs("{}/TH2F_sys{}.png".format(output,name, sector+1))
+
+	print "{} Safe by: {} +/- {}".format(name, 1*(TH1F_cutoffs.GetMean() ), 1* TH1F_cutoffs.GetMeanError()   )
 
 		
