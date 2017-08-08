@@ -30,17 +30,19 @@ def make2dStatsPlots(hist_array, name, rms_range, output):
 	for sector in range(4):
 		color = 0
 		TH2F_stats_v_rms.append([])
+
 		TGraph_stats_v_rms.append([])
 		fit.append([])
 		for wheel in range(3):
 			TGraph_stats_v_rms[sector].append (r.TGraphErrors())
 			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel, sector+1), 100, 0, 200000, 100, 0, rms_range))
 
+
 			#for hist in enumerate(hist_array):
 			for count in range(len(hist_array)):
 				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel,sector+1),hist_array[count].getRMS{}(wheel,sector+1))".format(name)
 				stats, statsError = hist_array[count].getMeanStats(wheel,sector+1), hist_array[count].getMeanStatsError(wheel,sector+1)
-				rms_command = "rms, rmsError = hist_array[count].getRMSProtected{}(wheel,sector+1), hist_array[count].getRMSProtectedError{}(wheel,sector+1)".format(name,name)
+				rms_command = "rms, rmsError = hist_array[count].getFit{}(wheel-2,sector+1, 2.5)".format(name,name)
 				exec(rms_command)
 				point_count = TGraph_stats_v_rms[sector][wheel].GetN()
 				TGraph_stats_v_rms[sector][wheel].SetPoint(point_count, stats, rms)
@@ -154,6 +156,8 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 	TH1F_cutoffs = r.TH1F("TH1F_cutoffs_{}".format(name), "{} cutoff values; {} rms".format(name,name), 100, 0, 100)
 	colorArray = [1,2,3,4,6]
 	TH2F_stats_v_rms = []
+	
+	
 	TGraph_stats_v_rms = []
 	TLine_cutoff = []
 	TLine_cutoff_error = []
@@ -161,18 +165,23 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output):
 	for sector in range(4):
 		color = 0
 		TH2F_stats_v_rms.append([])
+		
 		TGraph_stats_v_rms.append([])
+
 		fit.append([])
 		for wheel in range(5):
 			TGraph_stats_v_rms[sector].append (r.TGraphErrors())
 			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), 100, 0, 200000, 100, 0, rms_range))
 
+			
+			print range(len(hist_array))
 			#for hist in enumerate(hist_array):
 			for count in range(len(hist_array)):
 				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel,sector+1),hist_array[count].getRMS{}(wheel,sector+1))".format(name)
 				stats, statsError = hist_array[count].getMeanStats(wheel-2,sector+1), hist_array[count].getMeanStatsError(wheel-2,sector+1)
-				rms_command = "rms, rmsError = hist_array[count].getRMS{}(wheel-2,sector+1), hist_array[count].getRMS{}Error(wheel-2,sector+1)".format(name,name)
+				rms_command = "rms, rmsError = hist_array[count].getFit{}(wheel-2,sector+1, 2.5, c2)".format(name,name)
 				exec(rms_command)
+				print rms, rmsError
 				point_count = TGraph_stats_v_rms[sector][wheel].GetN()
 				TGraph_stats_v_rms[sector][wheel].SetPoint(point_count, stats, rms)
 				TGraph_stats_v_rms[sector][wheel].SetPointError(point_count, statsError, rmsError)

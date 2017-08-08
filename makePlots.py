@@ -3,9 +3,9 @@ import xml.etree.ElementTree as ET
 import math
 from array import array
 import wsh
-import makeplots
 
-r.gStyle.SetOptStat(0)
+
+#r.gStyle.SetOptStat(0)
 r.gROOT.SetBatch(True)
 
 	
@@ -25,8 +25,8 @@ full_data = wsh.ChamberInfo("full_data", reports, "full_data.xml")
 
 execfile("full.py")
 full = wsh.ChamberInfo("full", reports, "full.xml")
-hist_array.append(wsh.WheelSectorHistograms("full", full, full_data, 7.5))
-hist_array5.append(wsh.WheelSectorHistograms5("full", full, full_data, 7.5))
+#hist_array.append(wsh.WheelSectorHistograms("full", full, full_data, 7.5))
+#hist_array5.append(wsh.WheelSectorHistograms5("full", full, full_data, 7.5))
 
 #execfile("half.py")
 #half = wsh.ChamberInfo("half", reports, "half.xml")
@@ -53,6 +53,7 @@ hist_array5.append(wsh.WheelSectorHistograms5("full", full, full_data, 7.5))
 #superduper_small = wsh.ChamberInfo("superduper_small", reports, "superduper_small.xml")
 #hist_array.append(wsh.WheelSectorHistograms("superduper_small", superduper_small))
 
+#c2 = r.TCanvas()
 
 #fileArray = ["div_16_3", "div_16_2", "div_16_1", "div_2_1", "div_16_8", "div_16_7", "div_16_6", "div_16_5", "div_16_4", "div_4_2", "div_4_1", "div_2_4", "div_2_3", "div_2_2", "div_4_4", "div_4_3", "div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
 fileArray = []
@@ -60,9 +61,6 @@ fileArray.append(["div_16_3", "div_16_2", "div_16_1", "div_16_8", "div_16_7", "d
 fileArray.append(["div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"])
 fileArray.append([  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ])
 fileArray.append([  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ])
-#fileArray_8 = ["div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
-#fileArray_4 = [  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ]
-#fileArray_4 = [  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ]
 
 for l_array in fileArray:
 	count = 0
@@ -71,27 +69,28 @@ for l_array in fileArray:
 		execfile("{}.py".format(file))
 		name = wsh.ChamberInfo(file, reports, "{}.xml".format(file))
 		if count == 0:
-			l_wsh =  wsh.WheelSectorHistograms(file, name, full_data, 7.5)
+			#l_wsh =  wsh.WheelSectorHistograms(file, name, full_data, 7.5)
 			l_wsh5 =  wsh.WheelSectorHistograms5(file, name, full_data, 7.5)
 		else:
-			l_wsh.add(wsh.WheelSectorHistograms(file, name, full_data, 7.5))
+			#l_wsh.add(wsh.WheelSectorHistograms(file, name, full_data, 7.5))
 			l_wsh5.add(wsh.WheelSectorHistograms5(file, name, full_data, 7.5))
 		count = count +1 
 	#l_wsh.draw_hists()
+	#l_wsh5.draw_hists()
 	
-	hist_array.append(l_wsh)
+	#hist_array.append(l_wsh)
 	hist_array5.append(l_wsh5)
 
 
-
+import makeplots
 
 
 #print dir(hist_array[0])
 
 
-makeplots.make2dStatsPlots(hist_array, "X", .1,"output_mc_2")
-makeplots.make2dStatsPlots(hist_array, "Y", .3,"output_mc_2")
-makeplots.make2dStatsPlots(hist_array, "Z", .3,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2")
 makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2")
 makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2")
 makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2")
