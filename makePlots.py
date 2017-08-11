@@ -61,6 +61,7 @@ fileArray.append(["div_16_3", "div_16_2", "div_16_1", "div_16_8", "div_16_7", "d
 fileArray.append(["div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"])
 fileArray.append([  "div_4_2", "div_4_1",  "div_4_4", "div_4_3" ])
 fileArray.append([  "div_2_1", "div_2_4", "div_2_3", "div_2_2" ])
+fileArray.append(["div_p7_3", "div_p7_2", "div_p7_1", "div_p7_8", "div_p7_7", "div_p7_6", "div_p7_5", "div_p7_4"])
 
 for l_array in fileArray:
 	count = 0
@@ -88,12 +89,12 @@ import makeplots
 #print dir(hist_array[0])
 
 
-makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2")
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2")
+makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2", .02)
+makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02)
+makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0001)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0001)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0001)
 		
 
 

@@ -10,9 +10,39 @@ r.gROOT.SetBatch(True)
 
 
 def fitCut(hist, sigmas, opts):
-    lower, upper = hist.GetMean()-sigmas*hist.GetRMS(), hist.GetMean()+sigmas*hist.GetRMS()
-   # hist.Fit("gaus",opts, "", lower, upper)
-    hist.Fit("gaus",opts)
+
+	lower, upper = -1,1 #hist.GetMean()-sigmas*hist.GetRMS(), hist.GetMean()+sigmas*hist.GetRMS()
+	mean, rms = hist.GetMean(), hist.GetRMS()
+	entries = hist.GetEntries()
+	max_val = hist.GetMaximum()
+	cust_gauss = r.TF1("cust_gauss","gaus(0)", -10,10)
+	cust_gauss.SetParameters( 10, mean, rms)
+	cust_gauss.SetParNames("peak", "mean", "sigma")
+	cust_gauss.SetParLimits(1, -mean*3,mean*3)
+	cust_gauss.SetParLimits(0, max_val/2, entries)
+	cust_gauss.SetParLimits(2, 0, rms*3)
+
+	hist.Fit("cust_gauss",opts, "", lower, upper)
+	#hist.Fit("cust_gauss",opts)
+
+
+def reBinBool(th1f):
+	rebin = False
+	rms = th1f.GetRMS()
+	th1f_range = th1f.GetXaxis().GetXmax() - th1f.GetXaxis().GetXmin()+.0
+	nBins = th1f.GetXaxis().GetNbins() +.0
+	bin_width = th1f_range/(nBins)
+	goal_width = rms/5.0
+	print th1f_range, bin_width, goal_width, rms
+	if goal_width > bin_width:
+		rebin = True
+	return rebin
+
+def reBinViaRMS(th1f):
+	while(reBinBool(th1f)):
+		th1f.Rebin(2)
+
+	
 
 
 class Chamber:
@@ -52,230 +82,6 @@ class ChamberInfo:
 		#   print chamber.detector, chamber.wheel, chamber.station, chamber.sector, chamber.stats, chamber.x
 
 
-class WheelSectorHistograms:
-	def __init__(self, name, chamber_class, ref_chambers, ref_lumi):
-		self.name = name
-		self.TH2F_sector_x = []
-		self.TH2F_sector_y = []
-		self.TH2F_sector_z = []
-		self.TH2F_sector_phix = []
-		self.TH2F_sector_phiy = []
-		self.TH2F_sector_phiz = []
-		for wheel in range(3):
-			self.TH2F_sector_x.append([])
-			self.TH2F_sector_y.append([])
-			self.TH2F_sector_z.append([])
-			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel,station+1),"x wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.3,.3 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel,station+1),"y wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.3,.3 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel,station+1),"z wheel {} station {}".format(wheel,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )		
-
-		for wheel in range(5):
-					self.TH2F_sector_phix.append([])
-					self.TH2F_sector_phiy.append([])
-					self.TH2F_sector_phiz.append([])
-					for station in range(4):
-						self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.05,.05 ) )
-						self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.05,.05 ) )
-						self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, 200000, 100, -.05,.05 ) )
-
-		for count, chamber in enumerate(chamber_class.chambers):
-			#print ref_chambers.chambers[count].wheel, ref_chambers.chambers[count].station, chamber.wheel, chamber.station
-			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
-			eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
-			self.TH2F_sector_x[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.x))
-			self.TH2F_sector_y[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.y))
-			self.TH2F_sector_z[abs(chamber.wheel)][chamber.station-1].Fill(eqv_lumi, float(chamber.z))
-			self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(chamber.stats, float(chamber.phix))
-			self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(chamber.stats, float(chamber.phiy))
-			self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(chamber.stats, float(chamber.phiz))
-
-
-
-
-
-	def add(self, other_wsh):
-		for wheel in range(3):
-			for sector in range(4):
-				self.TH2F_sector_x[wheel][sector].Add(other_wsh.TH2F_sector_x[wheel][sector])
-				self.TH2F_sector_y[wheel][sector].Add(other_wsh.TH2F_sector_y[wheel][sector])
-				self.TH2F_sector_z[wheel][sector].Add(other_wsh.TH2F_sector_z[wheel][sector])
-		for wheel in range(5):
-			for sector in range(4):
-				self.TH2F_sector_phix[wheel][sector].Add(other_wsh.TH2F_sector_phix[wheel][sector])
-				self.TH2F_sector_phiy[wheel][sector].Add(other_wsh.TH2F_sector_phiy[wheel][sector])
-				self.TH2F_sector_phiz[wheel][sector].Add(other_wsh.TH2F_sector_phiz[wheel][sector])
-				
-				
-	def draw_hists(self):
-		for wheel in range(3):
-			for sector in range(4):
-				self.TH2F_sector_x[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}_projection.png".format(self.name,wheel,sector+1))
-				self.TH2F_sector_y[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}_projection.png".format(self.name,wheel,sector+1))
-				self.TH2F_sector_z[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}_projection.png".format(self.name,wheel,sector+1))
-		for wheel in range(5):
-			for sector in range(4):
-				self.TH2F_sector_phix[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}_projection.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_phiy[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}_projection.png".format(self.name,wheel-2,sector+1))
-				self.TH2F_sector_phiz[wheel][sector].Draw()
-				self.c2.SaveAs("output_mc_2/{}_TH2F_sector_phiz_{}_{}_projection.png".format(self.name,wheel-2,sector+1))
-
-
-
-				#print self.TH2F_sector_x[wheel][sector].GetRMS()
-
-	#def getRMSStats(self,wheel, sector):
-	#   return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(1)
-
-	def getMedianofAbs(self, histogram):
-		nq = 5
-		xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
-		yq1 = array('d', [0.] * nq)  # array to contain the quantiles
-
-		for i in xrange(nq):
-			xq[i] = float(i + 1) / nq
-		histogram.GetQuantiles(nq, yq1, xq)
-		print "hi", yq1
-		return  yq1[2]
-
-	def getQuantilesAbs(self, histogram, nq):
-		xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
-		yq1 = array('d', [0.] * nq)  # array to contain the quantiles
-
-		for i in xrange(nq):
-			xq[i] = float(i + 1) / nq
-		histogram.GetQuantiles(nq, yq1, xq)
-		#print "hi", yq1
-		return  yq1
-
-
-	def getMeanStats(self,wheel, sector):
-		return self.TH2F_sector_x[wheel][sector-1].GetMean(1)
-
-	def getMeanStatsError(self,wheel, sector):
-		return self.TH2F_sector_x[wheel][sector-1].GetMeanError(1)
-
-	def getRMSOutlierProtected(self,hist, count):
-		yq = self.getQuantilesAbs(hist, count)
-		temp_hist = hist
-		#print temp_hist.GetRMS()
-		temp_hist.GetXaxis().SetRangeUser(yq[1], yq[count-2])
-		#print temp_hist.GetRMS()
-		return temp_hist.GetRMS()
-
-	def getRMSOutlierProtectedError(self,hist, count):
-		yq = self.getQuantilesAbs(hist, count)
-		temp_hist = hist
-		#print temp_hist.GetRMS()
-		temp_hist.GetXaxis().SetRangeUser(yq[1], yq[count-2])
-		#print temp_hist.GetRMS()
-		return temp_hist.GetRMSError()
-
-	def getRMSProtectedX(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_x[wheel][sector-1].ProjectionY(),10)
-
-		#return self.getMedianofAbs(self.TH2F_sector_x[wheel][sector-1].ProjectionY()) 
-
-	def getRMSProtectedY(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_y[wheel][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedZ(self,wheel, sector):
-		return self.getRMSOutlierProtected(self.TH2F_sector_z[wheel][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedErrorX(self,wheel, sector):
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_x[wheel][sector-1].ProjectionY(),10)
-
-		#return self.getMedianofAbs(self.TH2F_sector_x[wheel][sector-1].ProjectionY()) 
-
-	def getRMSProtectedErrorY(self,wheel, sector):
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_y[wheel][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedErrorZ(self,wheel, sector):
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_z[wheel][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedErrorPHIX(self,wheel, sector):
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedErrorPHIY(self,wheel, sector):		
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY(),10)
-
-	def getRMSProtectedErrorPHIZ(self,wheel, sector):
-		return self.getRMSOutlierProtectedError(self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY(),10)
-
-
-	def getFitX(self,wheel, sector, sigmas):
-		fit_hist_x = self.TH2F_sector_x[wheel][sector-1].ProjectionY()
-		print fit_hist_x.GetEntries()
-		fitCut(fit_hist_x, sigmas, "QC")
-		return fit_hist_x.GetFunction("gaus").GetParameter(2), fit_hist_x.GetFunction("gaus").GetParError(2)
-
-	def getFitY(self,wheel, sector, sigmas):
-		fit_hist_y = self.TH2F_sector_y[wheel][sector-1].ProjectionY()
-		fitCut(fit_hist_y, sigmas, "QC")
-		return fit_hist_y.GetFunction("gaus").GetParameter(2), fit_hist_y.GetFunction("gaus").GetParError(2)
-
-	def getFitZ(self,wheel, sector, sigmas):
-		fit_hist_z = self.TH2F_sector_z[wheel][sector-1].ProjectionY()
-		fitCut(fit_hist_z, sigmas, "QC")
-		return fit_hist_z.GetFunction("gaus").GetParameter(2), fit_hist_z.GetFunction("gaus").GetParError(2)
-
-	def getFitPHIX(self,wheel, sector, sigmas):
-		fit_hist_phix = self.TH2F_sector_phix[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phix, sigmas, "QC")
-		return fit_hist_phix.GetFunction("gaus").GetParameter(2), fit_hist_phix.GetFunction("gaus").GetParError(2)
-
-	def getFitPHIY(self,wheel, sector, sigmas):
-		fit_hist_phiy = self.TH2F_sector_phiy[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phiy, sigmas, "QC")
-		return fit_hist_phiy.GetFunction("gaus").GetParameter(2), fit_hist_phiy.GetFunction("gaus").GetParError(2)
-
-	def getFitPHIZ(self,wheel, sector, sigmas):
-		fit_hist_phiz = self.TH2F_sector_phiz[wheel+2][sector-1].ProjectionY()
-		fitCut(fit_hist_phiz, sigmas, "QC")
-		return fit_hist_phiz.GetFunction("gaus").GetParameter(2), fit_hist_phiz.GetFunction("gaus").GetParError(2)
-
-
-	def getRMSX(self,wheel, sector):
-		return self.TH2F_sector_x[wheel][sector-1].GetRMS(2)
-
-	def getRMSY(self,wheel, sector):
-		return self.TH2F_sector_y[wheel][sector-1].GetRMS(2)
-
-	def getRMSZ(self,wheel, sector):
-		return self.TH2F_sector_z[wheel][sector-1].GetRMS(2)
-
-	def getRMSPHIX(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMS(2)
-
-	def getRMSPHIY(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMS(2)
-
-	def getRMSPHIZ(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
-
-	def getRMSXError(self,wheel, sector):
-		return self.TH2F_sector_x[wheel][sector-1].GetRMSError(2)
-
-	def getRMSYError(self,wheel, sector):
-		return self.TH2F_sector_y[wheel][sector-1].GetRMSError(2)
-
-	def getRMSZError(self,wheel, sector):
-		return self.TH2F_sector_z[wheel][sector-1].GetRMSError(2)
-
-	def getRMSPHIXError(self,wheel, sector):
-		return self.TH2F_sector_phix[wheel+2][sector-1].GetRMSError(2)
-
-	def getRMSPHIYError(self,wheel, sector):
-		return self.TH2F_sector_phiy[wheel+2][sector-1].GetRMSError(2)
-
-	def getRMSPHIZError(self,wheel, sector):
-		return self.TH2F_sector_phiz[wheel+2][sector-1].GetRMSError(2)
-
 
 class WheelSectorHistograms5:
 	def __init__(self, name, chamber_class, ref_chambers, ref_lumi):
@@ -302,12 +108,12 @@ class WheelSectorHistograms5:
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
-				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.5,.5 ) )
-				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.02,.02 ) )
-				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.02,.02 ) )
-				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 100, -.01,.01 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.49,.5 ) )
+				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
+				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
+				self.TH2F_sector_phiz[wheel].append( r.TH2F("{}_TH2F_sector_phiz_{}_{}".format(self.name, wheel-2,station+1),"#phi zwheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.01,.01 ) )
 
 		for count, chamber in enumerate(chamber_class.chambers):
 			#print chamber.wheel, chamber.station, chamber.sector, chamber.x
@@ -416,42 +222,60 @@ class WheelSectorHistograms5:
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMeanError(1)
 
 	def getFitX(self,wheel, sector, sigmas, canvas):
-
-		self.TH1F_sector_x[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
+		#self.TH1F_sector_x[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_x[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_x[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
-		
-		return  self.TH1F_sector_x[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_x[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		rms = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2)
+		mean = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(1)
+		self.TH1F_sector_x[wheel+2][sector-1].GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
+		self.TH1F_sector_x[wheel+2][sector-1].Draw()
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_cut_{}_{}.png".format(self.name,wheel,sector))	
+		rms = self.TH1F_sector_x[wheel+2][sector-1].GetRMS()
+		rmsError = self.TH1F_sector_x[wheel+2][sector-1].GetRMSError()
+		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitY(self,wheel, sector, sigmas, canvas):
-		self.TH1F_sector_y[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_y[wheel+2][sector-1])
+		#self.TH1F_sector_y[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_y[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_y[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
-		return self.TH1F_sector_y[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel,sector))
+		#print "chi2: ", self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		return self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitZ(self,wheel, sector, sigmas, canvas):
-		self.TH1F_sector_z[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_z[wheel+2][sector-1])
+		#self.TH1F_sector_z[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_z[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_z[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_z[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_z[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel,sector))		
+		return self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIX(self,wheel, sector, sigmas, canvas):
-		self.TH1F_sector_phix[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_phix[wheel+2][sector-1])
+		#self.TH1F_sector_phix[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_phix[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_phix[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel,sector))		
+		return self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIY(self,wheel, sector, sigmas, canvas):
-		self.TH1F_sector_phiy[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_phiy[wheel+2][sector-1])
+		#self.TH1F_sector_phiy[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_phiy[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_phiy[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel,sector))		
+		return self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIZ(self,wheel, sector, sigmas, canvas):
-		self.TH1F_sector_phiz[wheel+2][sector-1].Fit("gaus", "QC")
+		reBinViaRMS(self.TH1F_sector_phiz[wheel+2][sector-1])
+		#self.TH1F_sector_phiz[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		fitCut(self.TH1F_sector_phiz[wheel+2][sector-1],1.5, "QC" )
 		self.TH1F_sector_phiz[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("gaus").GetParameter(2), self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("gaus").GetParError(2)
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel,sector))		
+		return self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getRMSX(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
