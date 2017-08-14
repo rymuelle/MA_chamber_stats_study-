@@ -32,7 +32,7 @@ def reBinBool(th1f):
 	th1f_range = th1f.GetXaxis().GetXmax() - th1f.GetXaxis().GetXmin()+.0
 	nBins = th1f.GetXaxis().GetNbins() +.0
 	bin_width = th1f_range/(nBins)
-	goal_width = rms/5.0
+	goal_width = rms/4.0
 	print th1f_range, bin_width, goal_width, rms
 	if goal_width > bin_width:
 		rebin = True
@@ -109,7 +109,7 @@ class WheelSectorHistograms5:
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
 				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
-				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.49,.5 ) )
+				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
 				self.TH2F_sector_phiy[wheel].append( r.TH2F("{}_TH2F_sector_phiy_{}_{}".format(self.name, wheel-2,station+1),"#phi ywheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
@@ -221,61 +221,73 @@ class WheelSectorHistograms5:
 	def getMeanStatsError(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetMeanError(1)
 
+
+	def returnFitProtectedRMS(self, hist, sector, sigmas):
+		reBinViaRMS(hist)
+		fitCut(hist,1.5, "QC" )
+		rms = hist.GetFunction("cust_gauss").GetParameter(2)
+		rmsError = hist.GetFunction("cust_gauss").GetParError(2)
+		mean = hist.GetFunction("cust_gauss").GetParameter(1)
+		hist.GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
+		#rms = hist.GetRMS()
+		#rmsError = hist.GetRMSError()
+		return rms, rmsError
+
 	def getFitX(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
-		#self.TH1F_sector_x[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_x[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_x[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_x[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
-		rms = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2)
-		mean = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(1)
-		self.TH1F_sector_x[wheel+2][sector-1].GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
-		self.TH1F_sector_x[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_cut_{}_{}.png".format(self.name,wheel,sector))	
-		rms = self.TH1F_sector_x[wheel+2][sector-1].GetRMS()
-		rmsError = self.TH1F_sector_x[wheel+2][sector-1].GetRMSError()
 		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		#reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
+		##self.TH1F_sector_x[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		#fitCut(self.TH1F_sector_x[wheel+2][sector-1],1.5, "QC" )
+		#self.TH1F_sector_x[wheel+2][sector-1].Draw()
+		#canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
+		#rms = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2)
+		#mean = self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(1)
+		#self.TH1F_sector_x[wheel+2][sector-1].GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
+		#self.TH1F_sector_x[wheel+2][sector-1].Draw()
+		#canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_cut_{}_{}.png".format(self.name,wheel,sector))	
+		#rms = self.TH1F_sector_x[wheel+2][sector-1].GetRMS()
+		#rmsError = self.TH1F_sector_x[wheel+2][sector-1].GetRMSError()
+		#return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitY(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_y[wheel+2][sector-1])
-		#self.TH1F_sector_y[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_y[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_y[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_y[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel,sector))
-		#print "chi2: ", self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
-		return self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		return  rms, rmsError, self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		#reBinViaRMS(self.TH1F_sector_y[wheel+2][sector-1])
+		##self.TH1F_sector_y[wheel+2][sector-1].Fit("cust_gauss", "QC")
+		#fitCut(self.TH1F_sector_y[wheel+2][sector-1],1.5, "QC" )
+		#self.TH1F_sector_y[wheel+2][sector-1].Draw()
+		#canvas.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel,sector))
+		##print "chi2: ", self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		#return self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitZ(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_z[wheel+2][sector-1])
-		#self.TH1F_sector_z[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_z[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_z[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_z[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel,sector))
+		return  rms, rmsError, self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIX(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_phix[wheel+2][sector-1])
-		#self.TH1F_sector_phix[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_phix[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phix[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phix[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel,sector))
+		return  rms, rmsError, self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIY(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_phiy[wheel+2][sector-1])
-		#self.TH1F_sector_phiy[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_phiy[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phiy[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phiy[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel,sector))
+		return  rms, rmsError, self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getFitPHIZ(self,wheel, sector, sigmas, canvas):
-		reBinViaRMS(self.TH1F_sector_phiz[wheel+2][sector-1])
-		#self.TH1F_sector_phiz[wheel+2][sector-1].Fit("cust_gauss", "QC")
-		fitCut(self.TH1F_sector_phiz[wheel+2][sector-1],1.5, "QC" )
+		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phiz[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phiz[wheel+2][sector-1].Draw()
-		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiz_{}_{}.png".format(self.name,wheel,sector))		
-		return self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetParameter(2), self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetParError(2), self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiZ_{}_{}.png".format(self.name,wheel,sector))
+		return  rms, rmsError, self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
 
 	def getRMSX(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)

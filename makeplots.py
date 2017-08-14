@@ -15,8 +15,8 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value):
 	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]*10^-4/x+[1]*10^-4)",0,10)
 	conv_gaussian.SetParameters(1.0, .01)
 	conv_gaussian.SetParNames("slope", "offset")
-	conv_gaussian.SetParLimits(1, .0000000000000001, 100)
-	conv_gaussian.SetParLimits(0, .0000000000000001, 100)
+	conv_gaussian.SetParLimits(1, .0000000000000001, 1000)
+	conv_gaussian.SetParLimits(0, .0000000000000001, 2000)
 	TGraph_cutoffs = r.TGraphErrors()
 	TH2F_cutoffs = r.TH2F("TH2F_cutoffs_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
 	TH2F_cutoffs_text = r.TH2F("TH2F_cutoffs_text_{}".format(name), "{} cutoff values in Luminosity;  wheel; sectors".format(name), 5, -2,2, 4, 1,4)
@@ -102,14 +102,18 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value):
 			covMatrix =  fit[sector][wheel].GetCovarianceMatrix()
 			#print covMatrix[0][0], covMatrix[1][0], covMatrix[1][1]
 			sigma0, sigma10, sigma1 = covMatrix[0][0], covMatrix[1][0], covMatrix[1][1]
-			par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
+			#par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0),  math.pow(cutoff_value,2)*10000 - TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
+			par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0),   TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
+			par0Error, par1Error = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0),TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)
 			cutoff = math.pow(par0/par1,1)
+			cutoff =  math.pow( par1/10000.0 + par0/50000.0  ,.5)
 			#print sigma0, sigma1, sigma10
-			error = math.pow(abs(cutoff),1)*( math.pow(sigma0/par0,2) +math.pow(sigma1/par1,2) - 2*sigma10/(par0*par1) )
+			error = 1 #math.pow(abs(cutoff),1)*( math.pow(sigma0/par0,2) +math.pow(sigma1/par1,2) - 2*sigma10/(par0*par1) )
 			if error > 0:
 				error = math.sqrt(error)
 			else : error = 0
-
+			print "rand lumi {} +/- {}".format( par0/(math.pow(cutoff_value,2)*10000), par0Error/(math.pow(cutoff_value,2)*10000) ) 
+			print "sys lumi {} +/- {}".format( par1, par1Error ) 
 			print "cuttoff for {} RMS /{}/{}: {} +/- {}".format(name, wheel-2, sector+1, cutoff, error)
 			#print math.sqrt(covMatrix[0][0]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0)
 			#print math.sqrt(covMatrix[1][1]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)

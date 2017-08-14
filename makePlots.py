@@ -92,9 +92,9 @@ import makeplots
 makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2", .02)
 makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02)
 makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0001)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0001)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0001)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0005)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0005)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0005)
 		
 
 
