@@ -7,11 +7,11 @@ import wsh
 r.gStyle.SetOptStat(0)
 r.gROOT.SetBatch(True)
 
-c2 = r.TCanvas()
+#c2 = r.TCanvas()
 
 
 
-def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value):
+def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]*10^-4/x+[1]*10^-4)",0,10)
 	conv_gaussian.SetParameters(1.0, .01)
 	conv_gaussian.SetParNames("slope", "offset")

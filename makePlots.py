@@ -5,7 +5,7 @@ from array import array
 import wsh
 
 
-#r.gStyle.SetOptStat(0)
+r.gStyle.SetOptStat(0)
 r.gROOT.SetBatch(True)
 
 	
@@ -53,7 +53,7 @@ full = wsh.ChamberInfo("full", reports, "full.xml")
 #superduper_small = wsh.ChamberInfo("superduper_small", reports, "superduper_small.xml")
 #hist_array.append(wsh.WheelSectorHistograms("superduper_small", superduper_small))
 
-#c2 = r.TCanvas()
+c2 = r.TCanvas()
 
 #fileArray = ["div_16_3", "div_16_2", "div_16_1", "div_2_1", "div_16_8", "div_16_7", "div_16_6", "div_16_5", "div_16_4", "div_4_2", "div_4_1", "div_2_4", "div_2_3", "div_2_2", "div_4_4", "div_4_3", "div_8_4", "div_8_3", "div_8_2", "div_8_1", "div_8_8", "div_8_7", "div_8_6", "div_8_5"]
 fileArray = []
@@ -77,10 +77,11 @@ for l_array in fileArray:
 			l_wsh5.add(wsh.WheelSectorHistograms5(file, name, full_data, 7.5))
 		count = count +1 
 	#l_wsh.draw_hists()
-	#l_wsh5.draw_hists()
+	l_wsh5.draw_hists(c2)
 	
 	#hist_array.append(l_wsh)
 	hist_array5.append(l_wsh5)
+
 
 
 import makeplots
@@ -89,12 +90,12 @@ import makeplots
 #print dir(hist_array[0])
 
 
-makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2", .02)
-makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02)
-makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0005)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0005)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0005)
+makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2", .02, c2)
+makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02, c2)
+makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02, c2)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0005, c2)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0005, c2)
+makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0005, c2)
 		
 
 
