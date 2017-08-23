@@ -28,6 +28,7 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 	
 	
 	TGraph_stats_v_rms = []
+	offset = []
 	TLine_cutoff = []
 	TLine_cutoff_error = []
 	fit = []
@@ -38,6 +39,8 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 		TGraph_stats_v_rms.append([])
 
 		fit.append([])
+
+		offset.append([])
 		for wheel in range(5):
 			TGraph_stats_v_rms[sector].append (r.TGraphErrors())
 			TH2F_stats_v_rms[sector].append( r.TH2F("TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), "TH2F_stats_v_rms_{}_{}_{}".format(name, wheel-2, sector+1), 100, 0, 200000, 100, 0, rms_range))
@@ -48,7 +51,7 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 			for count in range(len(hist_array)):
 				#fill_command = "TH2F_stats_v_rms[sector][wheel].Fill(hist_array[count].getMeanStats(wheel,sector+1),hist_array[count].getRMS{}(wheel,sector+1))".format(name)
 				stats, statsError = hist_array[count].getMeanStats(wheel-2,sector+1), hist_array[count].getMeanStatsError(wheel-2,sector+1)
-				rms_command = "fit_rms, fit_rmsError, fit_chi2 = hist_array[count].getFit{}(wheel-2,sector+1, 2.5, c2)".format(name,name)
+				rms_command = "fit_rms, fit_rmsError, fit_chi2, RMS_offset = hist_array[count].getFit{}(wheel-2,sector+1, 2.5, c2)".format(name,name)
 
 				exec(rms_command)
 				rms_command = "rms, rmsError = hist_array[count].getRMS{}(wheel-2,sector+1), hist_array[count].getRMS{}Error(wheel-2,sector+1)".format(name,name)
@@ -61,6 +64,8 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 					TGraph_stats_v_rms[sector][wheel].SetPoint(point_count, stats, fit_rms)
 					TGraph_stats_v_rms[sector][wheel].SetPointError(point_count, statsError, fit_rmsError)
 				old_fit_rms, old_fit_rmsError, old_fit_chi2 = fit_rms, fit_rmsError, fit_chi2
+			RMS_offset = math.pow(RMS_offset,2)* math.pow(10,4)
+			offset[sector].append(RMS_offset)
 				
 				
 				#exception_catch_rms = "rms_value = hist_array[count].getRMS{}(wheel,sector+1)".format(name)
@@ -105,8 +110,9 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 			#par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0),  math.pow(cutoff_value,2)*10000 - TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
 			par0, par1 = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(0),   TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParameter(1)
 			par0Error, par1Error = TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0),TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)
-			cutoff = math.pow(par0/par1,1)
-			cutoff =  math.pow( par1/10000.0 + par0/50000.0  ,.5)
+			par1 = offset[sector][wheel]
+			cutoff = math.pow(par0/par1,1)*4
+			#cutoff =  math.pow( par1/10000.0 + par0/50000.0  ,.5)
 			#print sigma0, sigma1, sigma10
 			error = 1 #math.pow(abs(cutoff),1)*( math.pow(sigma0/par0,2) +math.pow(sigma1/par1,2) - 2*sigma10/(par0*par1) )
 			if error > 0:
@@ -149,8 +155,10 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 			legend.AddEntry(TGraph_stats_v_rms[sector][wheel], "{} {}".format( wheel-2, sector+1), "lep")
 		legend.Draw()
 		c2.SaveAs("{}/TGraph_stats_v_rms_{}_sector{}.png".format(output,name, sector+1))
-	TGraph_cutoffs.Draw()
+	c2.Clear()
+	TGraph_cutoffs.Draw("AP")
 	c2.SaveAs("{}/TGraph_cutoffs_{}.png".format(output,name, sector+1))
+
 	TH1F_cutoffs.Draw()
 	c2.SaveAs("{}/TH1F_cutoffs_{}.png".format(output,name, sector+1))
 

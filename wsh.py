@@ -84,9 +84,10 @@ class ChamberInfo:
 
 
 class WheelSectorHistograms5:
-	def __init__(self, name, chamber_class, ref_chambers, ref_lumi):
-		self.name = name + "5"
+	def __init__(self, name, chamber_class, ref_chambers, ref_lumi, sys_comparison):
+		self.name = name 
 		self.TH2F_sector_x = []
+		self.TH2F_sector_x_offset = []
 		self.TH2F_sector_y = []
 		self.TH2F_sector_z = []
 		self.TH2F_sector_phix = []
@@ -99,21 +100,26 @@ class WheelSectorHistograms5:
 		self.TH1F_sector_phiy = []
 		self.TH1F_sector_phiz = []
 		self.TH2F_fit_x_sector_station = []
-		self.c2 = r.TCanvas()
-		self.black_list = [(1,5), (2,5)  ]
+
+		self.TH1F_sector_x_offset = []
+		#self.c2 = r.TCanvas()
+		#self.black_list = [(1,5), (2,5)  ]
+		self.black_list = []
 
 		for station in range(4):
 			self.TH2F_fit_x_sector_station.append( r.TH2F("{}TH2F_fit_x_sector_station_{}".format(self.name, station+1),"x fit position v sector, wheel for station {}; sector; wheel".format(station+1), 12, .5, 12.5, 5, -2, 2) )
 
 		for wheel in range(5):
 			self.TH2F_sector_x.append([])
+			self.TH2F_sector_x_offset.append([])
 			self.TH2F_sector_y.append([])
 			self.TH2F_sector_z.append([])
 			self.TH2F_sector_phix.append([])
 			self.TH2F_sector_phiy.append([])
 			self.TH2F_sector_phiz.append([])
 			for station in range(4):
-				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.07,.07 ) )
+				self.TH2F_sector_x_offset[wheel].append( r.TH2F("{}_TH2F_sector_x_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
@@ -124,18 +130,25 @@ class WheelSectorHistograms5:
 			fill = True
 			for bad_chamber in self.black_list:
 				if chamber.wheel == bad_chamber[0] and chamber.sector == bad_chamber[1]:
-					print "did not fill: ", chamber.wheel, chamber.sector , chamber.station
+					#print "did not fill: ", chamber.wheel, chamber.sector , chamber.station
 					fill = False
 			if fill:
+				comp_chamber = sys_comparison.chambers[count] 
+				#print comp_chamber.wheel, comp_chamber.sector, comp_chamber.station
 				eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
-				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
+				#self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x) - float(comp_chamber.x))
+				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
+				self.TH2F_sector_x_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
+				#self.TH2F_sector_x_offset[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
+				#self.TH2F_sector_x[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
 				self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y))
 				self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.z))
 				self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phix))
 				self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiy))
 				self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiz))
-				self.TH2F_fit_x_sector_station[chamber.station-1].SetBinContent(chamber.sector, chamber.wheel+3, float(chamber.x))
-				print "filled: ", chamber.wheel, chamber.sector , chamber.station
+				self.TH2F_fit_x_sector_station[chamber.station-1].SetBinContent(chamber.sector, chamber.wheel+3, float(chamber.x) - float(comp_chamber.x))
+				#print float(chamber.x)
+				#print "filled: ", chamber.wheel, chamber.sector , chamber.station
 
 		for wheel in range(5):
 			self.TH1F_sector_x.append([])
@@ -144,7 +157,11 @@ class WheelSectorHistograms5:
 			self.TH1F_sector_phix.append([])
 			self.TH1F_sector_phiy.append([])
 			self.TH1F_sector_phiz.append([])
+
+			self.TH1F_sector_x_offset.append([])
 			for station in range(4):
+				self.TH1F_sector_x[wheel].append( self.TH2F_sector_x[wheel][station].ProjectionY() )
+				self.TH1F_sector_x_offset[wheel].append( self.TH2F_sector_x_offset[wheel][station].ProjectionY() )
 				self.TH1F_sector_x[wheel].append( self.TH2F_sector_x[wheel][station].ProjectionY() )
 				self.TH1F_sector_y[wheel].append( self.TH2F_sector_y[wheel][station].ProjectionY() )
 				self.TH1F_sector_z[wheel].append( self.TH2F_sector_z[wheel][station].ProjectionY() )
@@ -255,17 +272,19 @@ class WheelSectorHistograms5:
 		rms = hist.GetFunction("cust_gauss").GetParameter(2)
 		rmsError = hist.GetFunction("cust_gauss").GetParError(2)
 		mean = hist.GetFunction("cust_gauss").GetParameter(1)
-		hist.GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
-		#rms = hist.GetRMS()
-		#rmsError = hist.GetRMSError()
+		hist.GetXaxis().SetRangeUser(mean-rms, mean+rms)
+		rms , rmsError = hist.GetRMS(), hist.GetRMSError()
 		return rms, rmsError
+
 
 	def getFitX(self,wheel, sector, sigmas, canvas):
 		
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_x[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_x[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[-abs(wheel)+2][sector-1], sector, sigmas)
+	
+		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 		#reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
 		##self.TH1F_sector_x[wheel+2][sector-1].Fit("cust_gauss", "QC")
 		#fitCut(self.TH1F_sector_x[wheel+2][sector-1],1.5, "QC" )
