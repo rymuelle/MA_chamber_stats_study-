@@ -103,8 +103,8 @@ class WheelSectorHistograms5:
 
 		self.TH1F_sector_x_offset = []
 		#self.c2 = r.TCanvas()
-		#self.black_list = [(1,5), (2,5)  ]
-		self.black_list = []
+		self.black_list = [(1,5), (2,5)  ]
+		#self.black_list = []
 
 		for station in range(4):
 			self.TH2F_fit_x_sector_station.append( r.TH2F("{}TH2F_fit_x_sector_station_{}".format(self.name, station+1),"x fit position v sector, wheel for station {}; sector; wheel".format(station+1), 12, .5, 12.5, 5, -2, 2) )
@@ -136,11 +136,12 @@ class WheelSectorHistograms5:
 				comp_chamber = sys_comparison.chambers[count] 
 				#print comp_chamber.wheel, comp_chamber.sector, comp_chamber.station
 				eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
-				#self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x) - float(comp_chamber.x))
-				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
-				self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
+				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
+				#self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
+
+				#self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
 				self.TH2F_sector_x_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
-				self.TH2F_sector_x_offset[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
+				#self.TH2F_sector_x_offset[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x_offset[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
 				self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y))
@@ -275,7 +276,7 @@ class WheelSectorHistograms5:
 		rmsError = hist.GetFunction("cust_gauss").GetParError(2)
 		mean = hist.GetFunction("cust_gauss").GetParameter(1)
 		hist.GetXaxis().SetRangeUser(mean-rms, mean+rms)
-		rms , rmsError = hist.GetRMS(), hist.GetRMSError()
+		#rms , rmsError = hist.GetRMS(), hist.GetRMSError()
 		return rms, rmsError
 
 
