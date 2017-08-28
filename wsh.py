@@ -255,9 +255,9 @@ class WheelSectorHistograms5:
 		rms = hist.GetFunction("cust_gauss").GetParameter(2)
 		rmsError = hist.GetFunction("cust_gauss").GetParError(2)
 		mean = hist.GetFunction("cust_gauss").GetParameter(1)
-		hist.GetXaxis().SetRangeUser(mean - 2.5*rms, mean + 2.5*rms)
-		#rms = hist.GetRMS()
-		#rmsError = hist.GetRMSError()
+		hist.GetXaxis().SetRangeUser(mean - 3.5*rms, mean + 3.5*rms)
+		rms = hist.GetRMS()
+		rmsError = hist.GetRMSError()
 		return rms, rmsError
 
 	def getFitX(self,wheel, sector, sigmas, canvas):
