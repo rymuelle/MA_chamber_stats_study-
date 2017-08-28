@@ -13,6 +13,7 @@ r.gROOT.SetBatch(True)
 
 def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 	conv_gaussian =r.TF1("conv_gaussian","TMath::Sqrt([0]*10^-4/x+[1]*10^-4)",0,10)
+	#conv_gaussian =r.TF1("conv_gaussian","([0]*10^-4/x+[1]*10^-4)",0,10)
 	conv_gaussian.SetParameters(1.0, .01)
 	conv_gaussian.SetParNames("slope", "offset")
 	conv_gaussian.SetParLimits(1, .0000000000000001, 1000)
@@ -119,7 +120,7 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 				error = math.sqrt(error)
 			else : error = 0
 			print "rand lumi {} +/- {}".format( par0/(math.pow(cutoff_value,2)*10000), par0Error/(math.pow(cutoff_value,2)*10000) ) 
-			print "sys lumi {} +/- {}".format( par1, par1Error ) 
+			print "sys lumi {} +/- {} ".format( math.pow(par1 *math.pow(10,-4) ,.5), par1Error ) 
 			print "cuttoff for {} RMS /{}/{}: {} +/- {}".format(name, wheel-2, sector+1, cutoff, error)
 			#print math.sqrt(covMatrix[0][0]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(0)
 			#print math.sqrt(covMatrix[1][1]), TGraph_stats_v_rms[sector][wheel].GetFunction("conv_gaussian").GetParError(1)
@@ -139,7 +140,7 @@ def make2dStatsPlotsPHI(hist_array, name, rms_range, output, cutoff_value, c2):
 			TGraph_cutoffs.SetPoint(point_count, cutoff, wheel)
 			TGraph_cutoffs.SetPointError(point_count, error, 0)
 			TH2F_rand.SetBinContent(wheel + 1, sector +1, par0/(math.pow(cutoff_value,2)*10000))
-			TH2F_sys.SetBinContent(wheel + 1, sector +1, par1)
+			TH2F_sys.SetBinContent(wheel + 1, sector +1, math.pow(par1 *math.pow(10,-4) ,.5) )
 			if error < 15: 
 				TH1F_cutoffs.Fill(cutoff*4)
 				TH2F_cutoffs.SetBinContent(wheel+1, sector+1 , cutoff)

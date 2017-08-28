@@ -138,7 +138,9 @@ class WheelSectorHistograms5:
 				eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
 				#self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x) - float(comp_chamber.x))
 				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
+				self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
 				self.TH2F_sector_x_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
+				self.TH2F_sector_x_offset[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x_offset[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
 				self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y))
@@ -282,7 +284,8 @@ class WheelSectorHistograms5:
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_x[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_x[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
-		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[-abs(wheel)+2][sector-1], sector, sigmas)
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[wheel+2][sector-1], sector, sigmas)
+		#rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[wheel+2][sector-1], sector, sigmas)
 	
 		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 		#reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
