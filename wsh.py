@@ -88,6 +88,12 @@ class WheelSectorHistograms5:
 		self.name = name 
 		self.TH2F_sector_x = []
 		self.TH2F_sector_x_offset = []
+		self.TH2F_sector_y_offset = []
+		self.TH2F_sector_z_offset = []
+		self.TH2F_sector_phix_offset = []
+		self.TH2F_sector_phiy_offset = []
+		self.TH2F_sector_phiz_offset = []
+
 		self.TH2F_sector_y = []
 		self.TH2F_sector_z = []
 		self.TH2F_sector_phix = []
@@ -100,8 +106,18 @@ class WheelSectorHistograms5:
 		self.TH1F_sector_phiy = []
 		self.TH1F_sector_phiz = []
 		self.TH2F_fit_x_sector_station = []
+		self.TH2F_fit_y_sector_station = []
+		self.TH2F_fit_z_sector_station = []
+		self.TH2F_fit_phix_sector_station = []
+		self.TH2F_fit_phiy_sector_station = []
+		self.TH2F_fit_phiz_sector_station = []
 
 		self.TH1F_sector_x_offset = []
+		self.TH1F_sector_y_offset = []
+		self.TH1F_sector_z_offset = []
+		self.TH1F_sector_phix_offset = []
+		self.TH1F_sector_phiy_offset = []
+		self.TH1F_sector_phiz_offset = []
 		#self.c2 = r.TCanvas()
 		self.black_list = [(1,5), (2,5)  ]
 		#self.black_list = []
@@ -112,6 +128,11 @@ class WheelSectorHistograms5:
 		for wheel in range(5):
 			self.TH2F_sector_x.append([])
 			self.TH2F_sector_x_offset.append([])
+			self.TH2F_sector_y_offset.append([])
+			self.TH2F_sector_z_offset.append([])
+			self.TH2F_sector_phix_offset.append([])
+			self.TH2F_sector_phiy_offset.append([])
+			self.TH2F_sector_phiz_offset.append([])
 			self.TH2F_sector_y.append([])
 			self.TH2F_sector_z.append([])
 			self.TH2F_sector_phix.append([])
@@ -120,6 +141,11 @@ class WheelSectorHistograms5:
 			for station in range(4):
 				self.TH2F_sector_x[wheel].append( r.TH2F("{}_TH2F_sector_x_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.07,.07 ) )
 				self.TH2F_sector_x_offset[wheel].append( r.TH2F("{}_TH2F_sector_x_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_y_offset[wheel].append( r.TH2F("{}_TH2F_sector_y_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_z_offset[wheel].append( r.TH2F("{}_TH2F_sector_z_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_phix_offset[wheel].append( r.TH2F("{}_TH2F_sector_phix_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_phiy_offset[wheel].append( r.TH2F("{}_TH2F_sector_phiy_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
+				self.TH2F_sector_phiz_offset[wheel].append( r.TH2F("{}_TH2F_sector_phiz_offset_{}_{}".format(self.name, wheel-2,station+1),"x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_y[wheel].append( r.TH2F("{}_TH2F_sector_y_{}_{}".format(self.name, wheel-2,station+1),"y wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_z[wheel].append( r.TH2F("{}_TH2F_sector_z_{}_{}".format(self.name, wheel-2,station+1),"z wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.5,.5 ) )
 				self.TH2F_sector_phix[wheel].append( r.TH2F("{}_TH2F_sector_phix_{}_{}".format(self.name, wheel-2,station+1),"#phi x wheel {} station {}".format(wheel-2,station+1), 100, 0, ref_lumi*5, 200, -.02,.02 ) )
@@ -136,19 +162,31 @@ class WheelSectorHistograms5:
 				comp_chamber = sys_comparison.chambers[count] 
 				#print comp_chamber.wheel, comp_chamber.sector, comp_chamber.station
 				eqv_lumi = float(chamber.stats)/float(ref_chambers.chambers[count].stats)*ref_lumi
-				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
-				#self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
+				self.TH2F_sector_x[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x) - float(comp_chamber.x))
+				self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
 
 				#self.TH2F_sector_x[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x)- float(comp_chamber.x) )
 				self.TH2F_sector_x_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
+				self.TH2F_sector_y_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.y))
+				self.TH2F_sector_z_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.z))
+				self.TH2F_sector_phix_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.phix))
+				self.TH2F_sector_phiy_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.phiy))
+				self.TH2F_sector_phiz_offset[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.phiz))
+
 				#self.TH2F_sector_x_offset[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x_offset[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(comp_chamber.x))
 				#self.TH2F_sector_x[2-chamber.wheel][chamber.station-1].Fill(float(eqv_lumi), float(chamber.x))
-				self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y))
-				self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.z))
-				self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phix))
-				self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiy))
-				self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiz))
+				self.TH2F_sector_y[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y) - float(comp_chamber.y))
+				self.TH2F_sector_y[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.y) - float(comp_chamber.y))
+				self.TH2F_sector_z[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.z) - float(comp_chamber.z))
+				self.TH2F_sector_z[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.z) - float(comp_chamber.z))
+				self.TH2F_sector_phix[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phix) - float(comp_chamber.phix))
+				self.TH2F_sector_phix[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phix) - float(comp_chamber.phix))
+				self.TH2F_sector_phiy[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiy) - float(comp_chamber.phiy))
+				self.TH2F_sector_phiy[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiy) - float(comp_chamber.phiy))
+				self.TH2F_sector_phiz[chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiz) - float(comp_chamber.phiz))
+				self.TH2F_sector_phiz[-chamber.wheel+2][chamber.station-1].Fill(float(eqv_lumi), float(chamber.phiz) - float(comp_chamber.phiz))
+
 				self.TH2F_fit_x_sector_station[chamber.station-1].SetBinContent(chamber.sector, chamber.wheel+3, float(chamber.x) - float(comp_chamber.x))
 				#print float(chamber.x)
 				#print "filled: ", chamber.wheel, chamber.sector , chamber.station
@@ -162,6 +200,11 @@ class WheelSectorHistograms5:
 			self.TH1F_sector_phiz.append([])
 
 			self.TH1F_sector_x_offset.append([])
+			self.TH1F_sector_y_offset.append([])
+			self.TH1F_sector_z_offset.append([])
+			self.TH1F_sector_phix_offset.append([])
+			self.TH1F_sector_phiy_offset.append([])
+			self.TH1F_sector_phiz_offset.append([])
 			for station in range(4):
 				self.TH1F_sector_x[wheel].append( self.TH2F_sector_x[wheel][station].ProjectionY() )
 				self.TH1F_sector_x_offset[wheel].append( self.TH2F_sector_x_offset[wheel][station].ProjectionY() )
@@ -171,6 +214,12 @@ class WheelSectorHistograms5:
 				self.TH1F_sector_phix[wheel].append( self.TH2F_sector_phix[wheel][station].ProjectionY() )
 				self.TH1F_sector_phiy[wheel].append( self.TH2F_sector_phiy[wheel][station].ProjectionY() )
 				self.TH1F_sector_phiz[wheel].append( self.TH2F_sector_phiz[wheel][station].ProjectionY() )
+				self.TH1F_sector_y_offset[wheel].append( self.TH2F_sector_y_offset[wheel][station].ProjectionY() )
+				self.TH1F_sector_z_offset[wheel].append( self.TH2F_sector_z_offset[wheel][station].ProjectionY() )
+				self.TH1F_sector_phix_offset[wheel].append( self.TH2F_sector_phix_offset[wheel][station].ProjectionY() )
+				self.TH1F_sector_phiy_offset[wheel].append( self.TH2F_sector_phiy_offset[wheel][station].ProjectionY() )
+				self.TH1F_sector_phiz_offset[wheel].append( self.TH2F_sector_phiz_offset[wheel][station].ProjectionY() )
+
 				
 
 
@@ -287,8 +336,8 @@ class WheelSectorHistograms5:
 		self.TH1F_sector_x[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_x_{}_{}.png".format(self.name,wheel,sector))
 		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[wheel+2][sector-1], sector, sigmas)
-		#rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[wheel+2][sector-1], sector, sigmas)
-	
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_x_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
 		return  rms, rmsError, self.TH1F_sector_x[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 		#reBinViaRMS(self.TH1F_sector_x[wheel+2][sector-1])
 		##self.TH1F_sector_x[wheel+2][sector-1].Fit("cust_gauss", "QC")
@@ -308,7 +357,10 @@ class WheelSectorHistograms5:
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_y[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_y[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_y_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_y_offset[wheel+2][sector-1], sector, sigmas)
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_y_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
+		return  rms, rmsError, self.TH1F_sector_y[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 		#reBinViaRMS(self.TH1F_sector_y[wheel+2][sector-1])
 		##self.TH1F_sector_y[wheel+2][sector-1].Fit("cust_gauss", "QC")
 		#fitCut(self.TH1F_sector_y[wheel+2][sector-1],1.5, "QC" )
@@ -321,25 +373,37 @@ class WheelSectorHistograms5:
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_z[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_z[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_z_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_z_offset[wheel+2][sector-1], sector, sigmas)
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_z_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
+		return  rms, rmsError, self.TH1F_sector_z[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 
 	def getFitPHIX(self,wheel, sector, sigmas, canvas):
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phix[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phix[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phix_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_phix_offset[wheel+2][sector-1], sector, sigmas)
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_phix_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
+		return  rms, rmsError, self.TH1F_sector_phix[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 
 	def getFitPHIY(self,wheel, sector, sigmas, canvas):
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phiy[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phiy[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiy_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_phiy_offset[wheel+2][sector-1], sector, sigmas)
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_phiy_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
+		return  rms, rmsError, self.TH1F_sector_phiy[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 
 	def getFitPHIZ(self,wheel, sector, sigmas, canvas):
 		rms, rmsError = self.returnFitProtectedRMS(self.TH1F_sector_phiz[wheel+2][sector-1], sector, sigmas)
 		self.TH1F_sector_phiz[wheel+2][sector-1].Draw()
 		canvas.SaveAs("output_mc_2/{}_TH2F_sector_phiZ_{}_{}.png".format(self.name,wheel,sector))
-		return  rms, rmsError, self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare()
+		rms_offset, rmsError_offset = self.returnFitProtectedRMS(self.TH1F_sector_phiz_offset[wheel+2][sector-1], sector, sigmas)
+		rms_offset2, rmsError_offset2 = self.returnFitProtectedRMS(self.TH1F_sector_phiz_offset[-wheel+2][sector-1], sector, sigmas)
+		rms_offset = (rms_offset2 + rms_offset)/2
+		return  rms, rmsError, self.TH1F_sector_phiz[wheel+2][sector-1].GetFunction("cust_gauss").GetChisquare(), rms_offset
 
 	def getRMSX(self,wheel, sector):
 		return self.TH2F_sector_x[wheel+2][sector-1].GetRMS(2)
