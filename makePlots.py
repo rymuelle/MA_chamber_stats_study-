@@ -3,13 +3,22 @@ import xml.etree.ElementTree as ET
 import math
 from array import array
 import wsh
+#import tdrstyle
 
+import tdrstyle_mod14
 
 r.gStyle.SetOptStat(0)
 r.gROOT.SetBatch(True)
 
-c2 = r.TCanvas()
 
+
+tdrstyle_mod14.setTDRStyle()
+
+TH1F_placeholder_hist = r.TH1F("test", "test", 100, 0, 8)
+
+c2 = tdrstyle_mod14.tdrCanvas("linear", TH1F_placeholder_hist, 4, -1, True)
+#c2 = r.TCanvas( )
+r.gPad.SetLeftMargin(0.2)
 	
 hist_array = []
 hist_array5 = []
@@ -98,11 +107,22 @@ import makeplots
 #print dir(hist_array[0])
 
 
-
 makeplots.make2dStatsPlotsPHI(hist_array5, "X", .1,"output_mc_2", .02, c2)
-makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02, c2)
-makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02, c2)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0005, c2)
-makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0005, c2)
+#makeplots.make2dStatsPlotsPHI(hist_array5, "Y", .3,"output_mc_2", .02, c2)
+#makeplots.make2dStatsPlotsPHI(hist_array5, "Z", .3,"output_mc_2", .02, c2)
+#makeplots.make2dStatsPlotsPHI(hist_array5, "PHIX", .03,"output_mc_2", .0005, c2)
+#makeplots.make2dStatsPlotsPHI(hist_array5, "PHIY", .014,"output_mc_2", .0005, c2)
 makeplots.make2dStatsPlotsPHI(hist_array5, "PHIZ", .002,"output_mc_2", .0005, c2)
-		
+
+#print x_plots
+#MG = r.TMultiGraph()
+#for station in range(4):
+#	for wheel in range(3):
+#		print station, wheel
+#		x_plots[station][wheel].SetLineColorAlpha(2,1)
+#		MG.Add(x_plots[station][wheel])
+#
+#MG.Draw()
+#
+#c2.SaveAs("output_mc_2/test_overview_plot.png")		
+#
